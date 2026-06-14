@@ -1645,13 +1645,16 @@
             status: 'available', currentBorrower: null, updatedAt: Date.now()
           };
           await STORAGE_ENGINE.put('equipment', newEquip);
-          if (CLOUD_SYNC_MANAGER.active) await CLOUD_SYNC_MANAGER.syncItem('equipment', newEquip);
-
-          STATE_STORE.set('equipment', [...STATE_STORE.get('equipment'), newEquip]);
+          if (CLOUD_SYNC_MANAGER.active) {
+            await CLOUD_SYNC_MANAGER.syncItem('equipment', newEquip);
+            // onSnapshot will update state — skip optimistic update to avoid duplicate
+          } else {
+            STATE_STORE.set('equipment', [...STATE_STORE.get('equipment'), newEquip]);
+            UI_RENDERER.render();
+          }
           nameField.value = '';
           serialField.value = '';
           UI_RENDERER.showToast(`เพิ่ม ${name} เข้าสู่ระบบสำเร็จแล้วค่ะ`, 'success');
-          UI_RENDERER.render();
         },
 
         openEquipmentEdit(id) {
