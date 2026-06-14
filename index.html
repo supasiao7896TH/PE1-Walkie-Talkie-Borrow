@@ -242,7 +242,15 @@
             <i data-lucide="clock" class="w-3 h-3"></i>
             หมดเวลาเซสชันใน <span id="session-countdown" class="text-gray-400 font-medium tabular-nums ml-1">15:00</span>
           </span>
-          <button onclick="SESSION_MANAGER.reset()" class="text-[10px] text-brand-light hover:underline">รีเซ็ตเวลา</button>
+          <div class="flex items-center gap-3">
+            <button id="notif-toggle-btn" onclick="APP_CORE.requestNotificationPermission()"
+              title="แจ้งเตือนเมื่อมีการยืม/คืน"
+              class="text-[10px] flex items-center gap-1 text-gray-500 hover:text-brand-light transition">
+              <i data-lucide="bell-off" id="notif-bell-icon" class="w-3 h-3"></i>
+              <span id="notif-status-text">แจ้งเตือน</span>
+            </button>
+            <button onclick="SESSION_MANAGER.reset()" class="text-[10px] text-brand-light hover:underline">รีเซ็ตเวลา</button>
+          </div>
         </div>
 
         <!-- Stats -->
@@ -764,6 +772,14 @@
       let _fs = null, _auth = null, _unsub = null;
       let _active = false;
       let _appId = 'a-class-radiosync';
+      let _prevEquipment = null;
+
+      function _notifyAdmin(title, body) {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+        try {
+          new Notification(title, { body, icon: './icon-192.png', tag: `rs-${Date.now()}` });
+        } catch(e) { console.warn('Notification failed', e); }
+      }
       try { if (typeof __app_id !== 'undefined') _appId = __app_id; } catch(e) {}
 
       async function _initFirebase(config) {
@@ -821,6 +837,21 @@
             STATE_STORE.set('syncStatus', 'syncing');
             const items = [];
             snapshot.forEach(d => items.push(d.data()));
+
+            // Detect status changes for admin push notification (skip on first load)
+            if (_prevEquipment !== null) {
+              for (const item of items) {
+                const prev = _prevEquipment.find(e => e.id === item.id);
+                if (!prev || prev.status === item.status) continue;
+                if (item.status === 'borrowed') {
+                  _notifyAdmin(`📻 ${item.name} ถูกยืม`, `รหัสพนักงาน: ${item.currentBorrower?.empId || '-'}`);
+                } else if (item.status === 'pending_return') {
+                  _notifyAdmin(`🔄 ${item.name} ส่งคืนรอตรวจ`, `จาก: ${item.currentBorrower?.empId || '-'}`);
+                }
+              }
+            }
+            _prevEquipment = items;
+
             if (items.length > 0) {
               await STORAGE_ENGINE.putMany('equipment', items);
               STATE_STORE.set('equipment', items);
@@ -1271,6 +1302,15 @@
               document.getElementById('admin-stat-borrowed').textContent =
                 equipment.filter(e => e.status !== 'available').length;
 
+              // Update notification bell icon
+              const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+              const bellIcon = document.getElementById('notif-bell-icon');
+              const bellBtn  = document.getElementById('notif-toggle-btn');
+              const bellText = document.getElementById('notif-status-text');
+              if (bellIcon) bellIcon.setAttribute('data-lucide', notifGranted ? 'bell' : 'bell-off');
+              if (bellBtn)  bellBtn.className = `text-[10px] flex items-center gap-1 transition ${notifGranted ? 'text-brand-light' : 'text-gray-500 hover:text-brand-light'}`;
+              if (bellText) bellText.textContent = notifGranted ? 'แจ้งเตือนเปิดอยู่' : 'แจ้งเตือน';
+
               // Pending approvals
               const approvalContainer = document.getElementById('admin-approval-list');
               const pending = equipment.filter(e => e.status === 'pending_return');
@@ -1655,6 +1695,29 @@
           nameField.value = '';
           serialField.value = '';
           UI_RENDERER.showToast(`เพิ่ม ${name} เข้าสู่ระบบสำเร็จแล้วค่ะ`, 'success');
+        },
+
+        async requestNotificationPermission() {
+          if (!('Notification' in window)) {
+            UI_RENDERER.showToast('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนค่ะ', 'error');
+            return;
+          }
+          if (Notification.permission === 'granted') {
+            UI_RENDERER.showToast('✅ เปิดการแจ้งเตือนอยู่แล้วค่ะ', 'success');
+            return;
+          }
+          if (Notification.permission === 'denied') {
+            UI_RENDERER.showToast('การแจ้งเตือนถูกบล็อก — กรุณาเปิดใน Settings ของเบราว์เซอร์ค่ะ', 'error');
+            return;
+          }
+          const result = await Notification.requestPermission();
+          if (result === 'granted') {
+            UI_RENDERER.render();
+            new Notification('RadioSync', { body: 'เปิดการแจ้งเตือนสำเร็จแล้วค่ะ ✅', icon: './icon-192.png' });
+            UI_RENDERER.showToast('✅ เปิดการแจ้งเตือนสำเร็จแล้วค่ะ', 'success');
+          } else {
+            UI_RENDERER.showToast('การแจ้งเตือนถูกปฏิเสธค่ะ', 'error');
+          }
         },
 
         openEquipmentEdit(id) {
