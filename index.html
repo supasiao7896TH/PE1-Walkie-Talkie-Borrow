@@ -1645,13 +1645,51 @@
             status: 'available', currentBorrower: null, updatedAt: Date.now()
           };
           await STORAGE_ENGINE.put('equipment', newEquip);
-          if (CLOUD_SYNC_MANAGER.active) await CLOUD_SYNC_MANAGER.syncItem('equipment', newEquip);
-
-          STATE_STORE.set('equipment', [...STATE_STORE.get('equipment'), newEquip]);
+          if (CLOUD_SYNC_MANAGER.active) {
+            await CLOUD_SYNC_MANAGER.syncItem('equipment', newEquip);
+            // onSnapshot will update state — skip optimistic update to avoid duplicate
+          } else {
+            STATE_STORE.set('equipment', [...STATE_STORE.get('equipment'), newEquip]);
+            UI_RENDERER.render();
+          }
           nameField.value = '';
           serialField.value = '';
           UI_RENDERER.showToast(`เพิ่ม ${name} เข้าสู่ระบบสำเร็จแล้วค่ะ`, 'success');
-          UI_RENDERER.render();
+        },
+
+        openEquipmentEdit(id) {
+          SESSION_MANAGER.reset();
+          const item = STATE_STORE.get('equipment').find(e => e.id === id);
+          if (item) UI_RENDERER.openEditDrawer(item);
+        },
+
+        async submitEquipmentEdit() {
+          SESSION_MANAGER.reset();
+          const id     = document.getElementById('edit-equip-id').value;
+          const name   = document.getElementById('edit-equip-name').value.trim();
+          const serial = document.getElementById('edit-equip-serial').value.trim();
+
+          document.getElementById('err-edit-name').classList.toggle('hidden', name !== '');
+          document.getElementById('err-edit-serial').classList.toggle('hidden', serial !== '');
+          if (!name || !serial) return;
+
+          const equipment = STATE_STORE.get('equipment');
+          const item = equipment.find(e => e.id === id);
+          if (!item) return;
+
+          const updatedItem = { ...item, name, serial, updatedAt: Date.now() };
+
+          try {
+            await STORAGE_ENGINE.put('equipment', updatedItem);
+            if (CLOUD_SYNC_MANAGER.active) await CLOUD_SYNC_MANAGER.syncItem('equipment', updatedItem);
+            STATE_STORE.set('equipment', equipment.map(e => e.id === id ? updatedItem : e));
+            UI_RENDERER.closeEditDrawer();
+            UI_RENDERER.showToast(`✏️ แก้ไข ${name} สำเร็จแล้วค่ะ`, 'success');
+            UI_RENDERER.render();
+          } catch(e) {
+            console.error('Edit equipment failed', e);
+            UI_RENDERER.showToast('แก้ไขล้มเหลว กรุณาลองใหม่ค่ะ', 'error');
+          }
         },
 
         openEquipmentEdit(id) {
