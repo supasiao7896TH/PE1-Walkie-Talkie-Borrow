@@ -453,6 +453,67 @@
     </div>
   </div>
 
+  <!-- ADMIN OVERRIDE DRAWER (Force Recall / Reassign) -->
+  <div id="admin-override-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300 flex flex-col justify-end">
+    <div onclick="UI_RENDERER.closeOverrideDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full max-h-[90vh] overflow-y-auto px-6 py-6 space-y-6 transform translate-y-full transition-transform duration-300" id="admin-override-sheet">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div>
+            <h3 id="override-title" class="font-display font-medium text-lg text-white">-</h3>
+            <p class="text-[10px] text-amber-400 font-semibold uppercase">Admin Override</p>
+          </div>
+        </div>
+        <button onclick="UI_RENDERER.closeOverrideDrawer()" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        </button>
+      </div>
+      <div class="bg-surface-raised border border-white/10 rounded-xl p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center shrink-0">
+          <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
+        </div>
+        <div>
+          <p id="override-equip-name" class="text-sm font-semibold text-white">-</p>
+          <p id="override-current-holder" class="text-xs text-gray-400">-</p>
+        </div>
+      </div>
+
+      <!-- Recall mode -->
+      <div id="override-recall-fields" class="hidden space-y-4">
+        <div>
+          <label for="recall-reason" class="block text-xs text-gray-400 font-medium mb-1.5">เหตุผลในการเรียกคืน <span class="text-red-400">*</span></label>
+          <textarea id="recall-reason" rows="3" placeholder="เช่น พนักงานลาออก / ลืมส่งคืน / เครื่องสูญหาย"
+            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220 resize-none"></textarea>
+          <span id="err-recall-reason" class="hidden text-xs text-red-400 mt-1 block">กรุณาระบุเหตุผลในการเรียกคืน</span>
+        </div>
+      </div>
+
+      <!-- Reassign mode -->
+      <div id="override-reassign-fields" class="hidden space-y-4">
+        <div>
+          <label for="reassign-empid" class="block text-xs text-gray-400 font-medium mb-1.5">รหัสพนักงานผู้รับเครื่องใหม่ <span class="text-red-400">*</span></label>
+          <input type="text" id="reassign-empid" placeholder="เช่น 74012"
+            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-reassign-empid" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกรหัสพนักงาน</span>
+        </div>
+        <div>
+          <label for="reassign-name" class="block text-xs text-gray-400 font-medium mb-1.5">ชื่อ - นามสกุล ผู้รับเครื่องใหม่ <span class="text-red-400">*</span></label>
+          <input type="text" id="reassign-name" placeholder="เช่น สมชาย ใจดี"
+            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-reassign-name" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกชื่อ-นามสกุล</span>
+        </div>
+      </div>
+
+      <button id="override-confirm-btn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm py-3.5 rounded-xl transition duration-220 shadow-lg shadow-amber-600/20 flex items-center justify-center gap-1.5 btn-active">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        <span id="override-confirm-label">ยืนยัน</span>
+      </button>
+    </div>
+  </div>
+
   <!-- CONFIRM MODAL -->
   <div id="custom-modal" class="fixed inset-0 z-50 invisible flex items-center justify-center px-4 transition-all duration-300">
     <div onclick="UI_RENDERER.closeCustomModal()" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
@@ -1262,6 +1323,56 @@
 
         get selectedEquipment() { return _selectedEquip; },
 
+        overrideTarget: null,
+
+        openOverrideDrawer(item, mode) {
+          this.overrideTarget = item;
+          const holder = item.currentBorrower;
+          document.getElementById('override-equip-name').textContent    = `${item.name} (${item.serial})`;
+          document.getElementById('override-current-holder').textContent =
+            holder ? `ผู้ถือปัจจุบัน: รหัส ${holder.empId} — ${holder.name}` : 'ไม่มีผู้ถือครอง';
+
+          const recallFields   = document.getElementById('override-recall-fields');
+          const reassignFields = document.getElementById('override-reassign-fields');
+          const title          = document.getElementById('override-title');
+          const confirmBtn      = document.getElementById('override-confirm-btn');
+          const confirmLabel    = document.getElementById('override-confirm-label');
+
+          if (mode === 'recall') {
+            recallFields.classList.remove('hidden');
+            reassignFields.classList.add('hidden');
+            title.textContent = 'เรียกคืนวิทยุ (Force Recall)';
+            confirmLabel.textContent = 'ยืนยันเรียกคืน';
+            confirmBtn.onclick = () => APP_CORE.submitForceRecall();
+            document.getElementById('recall-reason').value = '';
+            document.getElementById('err-recall-reason').classList.add('hidden');
+          } else {
+            recallFields.classList.add('hidden');
+            reassignFields.classList.remove('hidden');
+            title.textContent = 'โอนเครื่องให้พนักงานอื่น';
+            confirmLabel.textContent = 'ยืนยันการโอน';
+            confirmBtn.onclick = () => APP_CORE.submitReassign();
+            document.getElementById('reassign-empid').value = '';
+            document.getElementById('reassign-name').value  = '';
+            document.getElementById('err-reassign-empid').classList.add('hidden');
+            document.getElementById('err-reassign-name').classList.add('hidden');
+          }
+
+          const drawer = document.getElementById('admin-override-drawer');
+          const sheet  = document.getElementById('admin-override-sheet');
+          drawer.classList.remove('invisible');
+          setTimeout(() => sheet.classList.remove('translate-y-full'), 10);
+        },
+
+        closeOverrideDrawer() {
+          const sheet = document.getElementById('admin-override-sheet');
+          sheet.classList.add('translate-y-full');
+          setTimeout(() => {
+            document.getElementById('admin-override-drawer').classList.add('invisible');
+            this.overrideTarget = null;
+          }, 200);
+        },
+
         openEditDrawer(item) {
           document.getElementById('edit-equip-id').value    = item.id;
           document.getElementById('edit-equip-name').value  = item.name;
@@ -1520,6 +1631,16 @@
                     </div>
                     <div class="flex items-center gap-1.5">
                       ${badge}
+                      ${(item.status === 'borrowed' || item.status === 'pending_return') ? `
+                      <button onclick="APP_CORE.openForceRecall('${_esc(item.id)}')"
+                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-orange-400 rounded transition btn-active" title="เรียกคืนทันที">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                      </button>` : ''}
+                      ${item.status === 'borrowed' ? `
+                      <button onclick="APP_CORE.openReassign('${_esc(item.id)}')"
+                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-blue-400 rounded transition btn-active" title="โอนให้คนอื่น">
+                        <i data-lucide="user-cog" class="w-3.5 h-3.5"></i>
+                      </button>` : ''}
                       <button onclick="APP_CORE.openEquipmentEdit('${_esc(item.id)}')"
                         class="p-1 hover:bg-white/5 text-gray-500 hover:text-amber-400 rounded transition btn-active" title="แก้ไข">
                         <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
@@ -1831,6 +1952,107 @@
             },
             'shield-check'
           );
+        },
+
+        openForceRecall(id) {
+          SESSION_MANAGER.reset();
+          const item = STATE_STORE.get('equipment').find(e => e.id === id);
+          if (item) UI_RENDERER.openOverrideDrawer(item, 'recall');
+        },
+
+        openReassign(id) {
+          SESSION_MANAGER.reset();
+          const item = STATE_STORE.get('equipment').find(e => e.id === id);
+          if (item) UI_RENDERER.openOverrideDrawer(item, 'reassign');
+        },
+
+        async submitForceRecall() {
+          SESSION_MANAGER.reset();
+          const item = UI_RENDERER.overrideTarget;
+          if (!item) return;
+
+          const reasonField = document.getElementById('recall-reason');
+          const reason = reasonField.value.trim();
+          document.getElementById('err-recall-reason').classList.toggle('hidden', reason !== '');
+          if (!reason) return;
+
+          try {
+            const prev = item.currentBorrower;
+            const updatedItem = { ...item, status: 'available', currentBorrower: null, updatedAt: Date.now() };
+            await STORAGE_ENGINE.put('equipment', updatedItem);
+
+            const log = {
+              id: `log-${crypto.randomUUID()}`,
+              equipId: item.id, equipName: item.name,
+              empId:   prev?.empId ?? 'unknown',
+              empName: prev?.name  ?? 'unknown',
+              action: 'แอดมินเรียกคืน (Force)', timestamp: Date.now(),
+              comment: `${reason} (เรียกคืนโดยแอดมิน)`
+            };
+            await STORAGE_ENGINE.put('logs', log);
+
+            if (CLOUD_SYNC_MANAGER.active) {
+              await CLOUD_SYNC_MANAGER.syncItem('equipment', updatedItem);
+              await CLOUD_SYNC_MANAGER.syncItem('logs', log);
+            }
+
+            STATE_STORE.set('equipment',
+              STATE_STORE.get('equipment').map(e => e.id === item.id ? updatedItem : e)
+            );
+            UI_RENDERER.closeOverrideDrawer();
+            UI_RENDERER.showToast(`🟢 เรียกคืน ${item.name} กลับเข้าคลังแล้วค่ะ`, 'success');
+            UI_RENDERER.render();
+          } catch(e) {
+            console.error('Force recall failed', e);
+            UI_RENDERER.showToast('เรียกคืนล้มเหลว กรุณาลองใหม่ค่ะ', 'error');
+          }
+        },
+
+        async submitReassign() {
+          SESSION_MANAGER.reset();
+          const item = UI_RENDERER.overrideTarget;
+          if (!item) return;
+
+          const empId   = document.getElementById('reassign-empid').value.trim();
+          const empName = document.getElementById('reassign-name').value.trim();
+          document.getElementById('err-reassign-empid').classList.toggle('hidden', empId !== '');
+          document.getElementById('err-reassign-name').classList.toggle('hidden', empName !== '');
+          if (!empId || !empName) return;
+
+          try {
+            const prev = item.currentBorrower;
+            const updatedItem = {
+              ...item, status: 'borrowed',
+              currentBorrower: { empId, name: empName, borrowedAt: Date.now() },
+              updatedAt: Date.now()
+            };
+            await STORAGE_ENGINE.put('equipment', updatedItem);
+
+            const fromTxt = prev ? `รหัส ${prev.empId} (${prev.name})` : 'ไม่มีผู้ถือ';
+            const log = {
+              id: `log-${crypto.randomUUID()}`,
+              equipId: item.id, equipName: item.name,
+              empId, empName,
+              action: 'แอดมินโอนเครื่อง', timestamp: Date.now(),
+              comment: `จาก ${fromTxt} → รหัส ${empId} (${empName})`
+            };
+            await STORAGE_ENGINE.put('logs', log);
+
+            if (CLOUD_SYNC_MANAGER.active) {
+              await CLOUD_SYNC_MANAGER.syncItem('equipment', updatedItem);
+              await CLOUD_SYNC_MANAGER.syncItem('logs', log);
+            }
+
+            STATE_STORE.set('equipment',
+              STATE_STORE.get('equipment').map(e => e.id === item.id ? updatedItem : e)
+            );
+            UI_RENDERER.closeOverrideDrawer();
+            UI_RENDERER.showToast(`🔄 โอน ${item.name} ให้ ${empName} แล้วค่ะ`, 'success');
+            UI_RENDERER.render();
+          } catch(e) {
+            console.error('Reassign failed', e);
+            UI_RENDERER.showToast('โอนเครื่องล้มเหลว กรุณาลองใหม่ค่ะ', 'error');
+          }
         },
 
         async addEquipmentFromAdmin() {
