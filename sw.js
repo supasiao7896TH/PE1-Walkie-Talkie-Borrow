@@ -45,8 +45,8 @@ self.addEventListener('notificationclick', event => {
 
 // ─── App-shell cache ──────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'pe1wt-v5';
-const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE_NAME   = 'pe1wt-v6';
+const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './tailwind.css'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

@@ -6,18 +6,46 @@ service cloud.firestore {
     // RadioSync app data — path: artifacts/{appId}/public/data/{collection}/{doc}
     match /artifacts/{appId}/public/data/{collection}/{docId} {
 
+      function isAdmin() {
+        return request.auth != null && request.auth.token.admin == true;
+      }
+
+      // Self-service: employee borrows an available radio themselves
+      function isSelfBorrow() {
+        return resource.data.status == 'available'
+            && request.resource.data.status == 'borrowed'
+            && request.resource.data.name   == resource.data.name
+            && request.resource.data.serial == resource.data.serial
+            && request.resource.data.currentBorrower != null;
+      }
+
+      // Self-service: employee requests return of a radio they hold
+      function isSelfReturnRequest() {
+        return resource.data.status == 'borrowed'
+            && request.resource.data.status == 'pending_return'
+            && request.resource.data.name            == resource.data.name
+            && request.resource.data.serial           == resource.data.serial
+            && request.resource.data.currentBorrower  == resource.data.currentBorrower;
+      }
+
       // Any anonymous-authenticated user can read all data
       allow read: if request.auth != null;
 
-      // Equipment: validate fields on create/update (request.resource.data exists)
-      allow create, update: if request.auth != null
-                            && collection == 'equipment'
-                            && request.resource.data.keys().hasAll(['id', 'name', 'serial', 'status', 'updatedAt'])
-                            && request.resource.data.status in ['available', 'borrowed', 'pending_return'];
+      // Equipment create: admin only (adding new equipment), must start available
+      allow create: if request.auth != null && collection == 'equipment' && isAdmin()
+                    && request.resource.data.keys().hasAll(['id', 'name', 'serial', 'status', 'updatedAt'])
+                    && request.resource.data.status == 'available';
 
-      // Equipment delete: allow authenticated users (admin PIN enforced client-side)
-      // Note: request.resource.data is null on delete, so must be a separate rule
-      allow delete: if request.auth != null && collection == 'equipment';
+      // Equipment update: admins may perform any valid transition (approve return,
+      // force recall, reassign, edit); employees may only self-service borrow or
+      // request-return their own device
+      allow update: if request.auth != null && collection == 'equipment'
+                    && request.resource.data.keys().hasAll(['id', 'name', 'serial', 'status', 'updatedAt'])
+                    && request.resource.data.status in ['available', 'borrowed', 'pending_return']
+                    && (isAdmin() || isSelfBorrow() || isSelfReturnRequest());
+
+      // Equipment delete: admin only
+      allow delete: if request.auth != null && collection == 'equipment' && isAdmin();
 
       // Logs: create-only — audit trail cannot be modified or deleted
       allow create: if request.auth != null && collection == 'logs'
@@ -30,6 +58,12 @@ service cloud.firestore {
                             && request.resource.data.keys().hasAll(['token', 'createdAt'])
                             && request.resource.data.token is string;
       allow delete: if request.auth != null && collection == 'adminTokens';
+    }
+
+    // Admin secret store (PIN hash + lockout state) — Cloud Functions Admin SDK
+    // only (bypasses rules); fully blocked from every client.
+    match /adminSecrets/{docId} {
+      allow read, write: if false;
     }
 
     // Block all other paths

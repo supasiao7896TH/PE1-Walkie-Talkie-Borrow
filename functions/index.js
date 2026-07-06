@@ -1,11 +1,90 @@
 'use strict';
 
+const crypto                = require('crypto');
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp }     = require('firebase-admin/app');
 const { getMessaging }      = require('firebase-admin/messaging');
 const { getFirestore }      = require('firebase-admin/firestore');
+const { getAuth }           = require('firebase-admin/auth');
 
 initializeApp();
+
+// ─── Admin PIN verification (server-side; Firestore rules require the
+// 'admin' custom claim minted here for any admin-only equipment write) ──────
+
+const PIN_SALT      = 'radiosync-server-pin-salt-v2'; // server-only, never shipped to the client
+const DEFAULT_PIN   = '1234';
+const MAX_ATTEMPTS   = 5;
+const LOCKOUT_MS     = 5 * 60 * 1000;
+
+function hashPin(pin) {
+  return crypto.createHash('sha256').update(pin + PIN_SALT).digest('hex');
+}
+
+exports.verifyAdminPin = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'ต้องเข้าสู่ระบบก่อน');
+  const pin = String(request.data?.pin || '');
+
+  const db       = getFirestore();
+  const configRef = db.doc('adminSecrets/config');
+  const lockRef    = db.doc('adminSecrets/lockout');
+
+  return db.runTransaction(async (tx) => {
+    const [lockSnap, configSnap] = await Promise.all([tx.get(lockRef), tx.get(configRef)]);
+    const lockData = lockSnap.exists ? lockSnap.data() : {};
+    const now = Date.now();
+
+    if (lockData.lockedUntil && now < lockData.lockedUntil) {
+      return { success: false, locked: true, remainingMs: lockData.lockedUntil - now };
+    }
+
+    const storedHash = configSnap.exists ? configSnap.data().pinHash : null;
+    if (!configSnap.exists) {
+      tx.set(configRef, { pinHash: hashPin(DEFAULT_PIN), updatedAt: now });
+    }
+
+    const inputHash = hashPin(pin);
+    const effectiveHash = storedHash || hashPin(DEFAULT_PIN);
+
+    if (inputHash === effectiveHash) {
+      tx.set(lockRef, { attempts: 0, lockedUntil: 0 });
+      await getAuth().setCustomUserClaims(request.auth.uid, { admin: true });
+      return { success: true };
+    }
+
+    const attempts = (lockData.attempts || 0) + 1;
+    if (attempts >= MAX_ATTEMPTS) {
+      tx.set(lockRef, { attempts: 0, lockedUntil: now + LOCKOUT_MS });
+      return { success: false, locked: true, remainingMs: LOCKOUT_MS };
+    }
+    tx.set(lockRef, { attempts, lockedUntil: 0 });
+    return { success: false, locked: false, remainingAttempts: MAX_ATTEMPTS - attempts };
+  });
+});
+
+exports.changeAdminPin = onCall(async (request) => {
+  if (!request.auth || request.auth.token.admin !== true) {
+    throw new HttpsError('permission-denied', 'ต้องเป็นแอดมินก่อน');
+  }
+  const currentPin = String(request.data?.currentPin || '');
+  const newPin     = String(request.data?.newPin || '');
+  if (!/^\d{4}$/.test(newPin)) {
+    return { success: false, error: 'invalid-format' };
+  }
+
+  const db        = getFirestore();
+  const configRef = db.doc('adminSecrets/config');
+  const snap      = await configRef.get();
+  const storedHash = snap.exists ? snap.data().pinHash : hashPin(DEFAULT_PIN);
+
+  if (hashPin(currentPin) !== storedHash) {
+    return { success: false, error: 'wrong-current-pin' };
+  }
+
+  await configRef.set({ pinHash: hashPin(newPin), updatedAt: Date.now() });
+  return { success: true };
+});
 
 exports.notifyAdminOnEquipmentChange = onDocumentUpdated(
   'artifacts/{appId}/public/data/equipment/{docId}',
