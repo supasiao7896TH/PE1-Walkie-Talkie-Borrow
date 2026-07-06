@@ -1070,20 +1070,6 @@
       let _fs = null, _auth = null, _unsub = null, _messaging = null;
       let _active = false;
       let _appId = 'a-class-radiosync';
-      let _prevEquipment = null;
-
-      function _notifyAdmin(title, body) {
-        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-        const opts = { body, icon: './icon-192.png', badge: './icon-192.png', tag: `rs-${Date.now()}`, renotify: true };
-        // Use SW showNotification for background/mobile support; fallback to Notification API
-        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.ready
-            .then(reg => reg.showNotification(title, opts))
-            .catch(() => { try { new Notification(title, opts); } catch(e) {} });
-        } else {
-          try { new Notification(title, opts); } catch(e) { console.warn('Notification failed', e); }
-        }
-      }
       try { if (typeof __app_id !== 'undefined') _appId = __app_id; } catch(e) {}
 
       async function _initFirebase(config) {
@@ -1175,19 +1161,8 @@
             const items = [];
             snapshot.forEach(d => items.push(d.data()));
 
-            // Detect status changes for admin push notification (skip on first load)
-            if (_prevEquipment !== null) {
-              for (const item of items) {
-                const prev = _prevEquipment.find(e => e.id === item.id);
-                if (!prev || prev.status === item.status) continue;
-                if (item.status === 'borrowed') {
-                  _notifyAdmin(`📻 ${item.name} ถูกยืม`, `รหัสพนักงาน: ${item.currentBorrower?.empId || '-'}`);
-                } else if (item.status === 'pending_return') {
-                  _notifyAdmin(`🔄 ${item.name} ส่งคืนรอตรวจ`, `จาก: ${item.currentBorrower?.empId || '-'}`);
-                }
-              }
-            }
-            _prevEquipment = items;
+            // Admin push notifications are sent server-side by the Cloud Function
+            // (functions/index.js) on every status change — do not duplicate here.
 
             if (items.length > 0) {
               await STORAGE_ENGINE.putMany('equipment', items);
@@ -2442,41 +2417,6 @@
           }
         },
 
-        openEquipmentEdit(id) {
-          SESSION_MANAGER.reset();
-          const item = STATE_STORE.get('equipment').find(e => e.id === id);
-          if (item) UI_RENDERER.openEditDrawer(item);
-        },
-
-        async submitEquipmentEdit() {
-          SESSION_MANAGER.reset();
-          const id     = document.getElementById('edit-equip-id').value;
-          const name   = document.getElementById('edit-equip-name').value.trim();
-          const serial = document.getElementById('edit-equip-serial').value.trim();
-
-          document.getElementById('err-edit-name').classList.toggle('hidden', name !== '');
-          document.getElementById('err-edit-serial').classList.toggle('hidden', serial !== '');
-          if (!name || !serial) return;
-
-          const equipment = STATE_STORE.get('equipment');
-          const item = equipment.find(e => e.id === id);
-          if (!item) return;
-
-          const updatedItem = { ...item, name, serial, updatedAt: Date.now() };
-
-          try {
-            await STORAGE_ENGINE.put('equipment', updatedItem);
-            if (CLOUD_SYNC_MANAGER.active) await CLOUD_SYNC_MANAGER.syncItem('equipment', updatedItem);
-            STATE_STORE.set('equipment', equipment.map(e => e.id === id ? updatedItem : e));
-            UI_RENDERER.closeEditDrawer();
-            UI_RENDERER.showToast(`✏️ แก้ไข ${name} สำเร็จแล้วค่ะ`, 'success');
-            UI_RENDERER.render();
-          } catch(e) {
-            console.error('Edit equipment failed', e);
-            UI_RENDERER.showToast('แก้ไขล้มเหลว กรุณาลองใหม่ค่ะ', 'error');
-          }
-        },
-
         deleteEquipmentFromAdmin(id) {
           SESSION_MANAGER.reset();
           const equipment = STATE_STORE.get('equipment');
@@ -2499,37 +2439,6 @@
           );
         },
 
-        toggleCloudSync() {
-          const active = document.getElementById('cloud-sync-toggle').checked;
-          localStorage.setItem('radiosync_cloud_sync_active', String(active));
-          document.getElementById('cloud-config-box').classList.toggle('hidden', !active);
-          if (!active) {
-            CLOUD_SYNC_MANAGER.stopListening();
-            STATE_STORE.set('syncStatus', 'local');
-            UI_RENDERER.render();
-          }
-        },
-
-        async saveCloudFirebaseConfig() {
-          const configText = document.getElementById('cloud-firebase-config').value.trim();
-          if (!configText) {
-            UI_RENDERER.showToast('กรุณาวางค่า Firebase Config ที่ถูกต้องด้วยนะคะ', 'error');
-            return;
-          }
-          try {
-            const parsed = JSON.parse(configText);
-            const required = ['apiKey', 'authDomain', 'projectId'];
-            if (!required.every(k => typeof parsed[k] === 'string' && parsed[k])) {
-              throw new Error('Missing required Firebase config fields');
-            }
-            localStorage.setItem('radiosync_firebase_config', configText);
-            await CLOUD_SYNC_MANAGER.init(parsed);
-          } catch(e) {
-            const msg = e.message.includes('Firebase') ? e.message : 'รูปแบบ JSON ไม่ถูกต้องค่ะ กรุณาตรวจสอบวงเล็บปีกกาและเครื่องหมายคำพูด';
-            UI_RENDERER.showToast(msg, 'error');
-          }
-        },
-
         async exportHistoryCSV() {
           try {
             const logs = await STORAGE_ENGINE.getAll('logs');
@@ -2549,7 +2458,12 @@
               }).format(new Date(log.timestamp)).replace(/,/g, '');
 
               const row = [i + 1, d, log.equipName, log.empName, `"${log.empId}"`, log.action, log.comment || '-']
-                .map(v => String(v).replace(/"/g, '""'))
+                .map(v => {
+                  let s = String(v).replace(/"/g, '""');
+                  // Neutralize formula-injection triggers when opened in Excel/Sheets
+                  if (/^[=+\-@]/.test(s)) s = `'${s}`;
+                  return s;
+                })
                 .join(',');
               csv += row + '\n';
             });
