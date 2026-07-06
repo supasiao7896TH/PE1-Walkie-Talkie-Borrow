@@ -45,7 +45,7 @@ self.addEventListener('notificationclick', event => {
 
 // ─── App-shell cache ──────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'pe1wt-v7';
+const CACHE_NAME   = 'pe1wt-v8';
 const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './tailwind.css'];
 
 self.addEventListener('install', (e) => {

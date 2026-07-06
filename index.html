@@ -181,11 +181,6 @@
           <div id="equip-count-badge" class="bg-surface-raised px-3 py-1 rounded-full text-xs text-gray-600 font-medium border border-slate-900/5">
             ว่าง -- เครื่อง
           </div>
-          <button onclick="document.getElementById('help-modal').classList.remove('invisible','opacity-0'); document.getElementById('help-modal').classList.add('opacity-100')"
-            class="w-8 h-8 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light hover:bg-brand/20 transition btn-active"
-            title="คู่มือการยืมวิทยุ">
-            <i data-lucide="book-open" class="w-4 h-4"></i>
-          </button>
         </div>
       </div>
       <div class="relative">
@@ -737,7 +732,7 @@
 
   <!-- BOTTOM NAV -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-page/90 backdrop-blur-md border-t border-slate-900/[0.08]">
-    <div class="max-w-md mx-auto grid grid-cols-3 h-[68px]">
+    <div class="max-w-md mx-auto grid grid-cols-4 h-[68px]">
       <button onclick="UI_RENDERER.switchTab('borrow')" id="nav-borrow" class="flex flex-col items-center justify-center gap-1.5 text-brand transition duration-220 btn-active group">
         <i data-lucide="radio" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
         <span class="text-[10px] font-medium tracking-wide">ยืมของ</span>
@@ -749,6 +744,10 @@
       <button onclick="UI_RENDERER.switchTab('admin')" id="nav-admin" class="flex flex-col items-center justify-center gap-1.5 text-gray-500 hover:text-gray-900 transition duration-220 btn-active group">
         <i data-lucide="settings" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
         <span class="text-[10px] font-medium tracking-wide">แอดมิน</span>
+      </button>
+      <button onclick="document.getElementById('help-modal').classList.remove('invisible','opacity-0'); document.getElementById('help-modal').classList.add('opacity-100')" id="nav-help" class="flex flex-col items-center justify-center gap-1.5 text-gray-500 hover:text-gray-900 transition duration-220 btn-active group">
+        <i data-lucide="book-open" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-medium tracking-wide">คู่มือ</span>
       </button>
     </div>
   </nav>
