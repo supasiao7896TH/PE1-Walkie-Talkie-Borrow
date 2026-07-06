@@ -16,36 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Tailwind Play CDN (dev/preview). For production: run `npx tailwindcss build` and inline the output. -->
-  <script>window._TWarn = console.warn; console.warn = (...a) => { if (String(a[0]).includes('cdn.tailwindcss.com')) return; _TWarn(...a); };</script>
-  <script src="https://cdn.tailwindcss.com" onload="console.warn=window._TWarn"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Sarabun', 'sans-serif'],
-            display: ['Fraunces', 'serif'],
-          },
-          colors: {
-            brand: {
-              DEFAULT: '#2563eb',
-              light: '#60a5fa',
-              dark: '#1e40af',
-              glow: 'rgba(37, 99, 235, 0.15)'
-            },
-            surface: {
-              page: '#0f0f12',
-              card: '#18181c',
-              raised: '#22222a',
-              overlay: '#2d2d38'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Precompiled Tailwind (built via `npx tailwindcss` from tailwind.config.js + input.css — see CLAUDE.md) -->
+  <link rel="stylesheet" href="./tailwind.css" />
 
   <!-- jsDelivr bundles source maps, eliminating the 404 from unpkg -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.447.0/dist/umd/lucide.min.js"></script>
@@ -822,6 +794,7 @@
       onSnapshot, collection, getDocs, runTransaction
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 
     window.FirebaseLib = {
       initializeApp, getAuth, signInAnonymously, onAuthStateChanged,
@@ -829,6 +802,7 @@
       getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
       onSnapshot, collection, getDocs, runTransaction,
       getMessaging, getToken,
+      getFunctions, httpsCallable,
     };
   </script>
 
@@ -852,11 +826,6 @@
       return {
         dbName:            'PE1WalkieTalkieDB',
         dbVersion:         1,
-        adminPinHashKey:   'radiosync_admin_pin_hash',
-        adminLockoutKey:   'radiosync_admin_lockout',
-        adminAttemptsKey:  'radiosync_admin_attempts',
-        maxAttempts:       5,
-        lockoutMs:         5 * 60 * 1000,   // 5 minutes
         sessionTimeoutMs:  15 * 60 * 1000,  // 15 minutes
         seedData: [
           { id: 'radio-1', name: 'Radio No.01', serial: '400101', status: 'available', currentBorrower: null, updatedAt: Date.now() },
@@ -867,78 +836,43 @@
     })();
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ② CRYPTO_UTILS — Web Crypto SHA-256 PIN hashing
-    // ─────────────────────────────────────────────────────────────────────────
-    const CRYPTO_UTILS = (() => {
-      const SALT = 'radiosync-pin-salt-v1';
-
-      async function hashPin(pin) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(pin + SALT);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hashBuffer))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-      }
-
-      return { hashPin };
-    })();
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // ③ PIN_GUARD — Brute-force protection, lockout, change PIN
+    // ② PIN_GUARD — Admin PIN verification, delegated to Cloud Functions so
+    // the PIN hash, brute-force lockout, and 'admin' claim grant all live
+    // server-side (Firestore rules require the claim for admin-only writes)
     // ─────────────────────────────────────────────────────────────────────────
     const PIN_GUARD = (() => {
-      async function ensureDefaultPin() {
-        if (!localStorage.getItem(APP_CONFIG.adminPinHashKey)) {
-          const hash = await CRYPTO_UTILS.hashPin('1234');
-          localStorage.setItem(APP_CONFIG.adminPinHashKey, hash);
-        }
-      }
-
-      function getLockoutStatus() {
-        const until = parseInt(localStorage.getItem(APP_CONFIG.adminLockoutKey) || '0');
-        if (Date.now() < until) {
-          return { locked: true, remainingMs: until - Date.now() };
-        }
-        return { locked: false, remainingMs: 0 };
-      }
-
       async function verify(pin) {
-        const lockout = getLockoutStatus();
-        if (lockout.locked) {
-          return { success: false, locked: true, remainingMs: lockout.remainingMs };
+        if (!CLOUD_SYNC_MANAGER.active) {
+          return { success: false, offline: true };
         }
-
-        const inputHash  = await CRYPTO_UTILS.hashPin(pin);
-        const storedHash = localStorage.getItem(APP_CONFIG.adminPinHashKey);
-
-        if (inputHash === storedHash) {
-          localStorage.removeItem(APP_CONFIG.adminAttemptsKey);
-          localStorage.removeItem(APP_CONFIG.adminLockoutKey);
-          return { success: true };
+        try {
+          const { httpsCallable } = window.FirebaseLib;
+          const fn  = httpsCallable(CLOUD_SYNC_MANAGER.functions, 'verifyAdminPin');
+          const res = await fn({ pin });
+          if (res.data.success) await CLOUD_SYNC_MANAGER.refreshAuthToken();
+          return res.data;
+        } catch (e) {
+          console.error('verifyAdminPin call failed', e);
+          return { success: false, error: true };
         }
-
-        const attempts = parseInt(localStorage.getItem(APP_CONFIG.adminAttemptsKey) || '0') + 1;
-        if (attempts >= APP_CONFIG.maxAttempts) {
-          const until = Date.now() + APP_CONFIG.lockoutMs;
-          localStorage.setItem(APP_CONFIG.adminLockoutKey, String(until));
-          localStorage.removeItem(APP_CONFIG.adminAttemptsKey);
-          return { success: false, locked: true, remainingMs: APP_CONFIG.lockoutMs };
-        }
-
-        localStorage.setItem(APP_CONFIG.adminAttemptsKey, String(attempts));
-        return { success: false, locked: false, remainingAttempts: APP_CONFIG.maxAttempts - attempts };
       }
 
       async function changePin(currentPin, newPin) {
-        const check = await verify(currentPin);
-        if (!check.success) return check;
-        const newHash = await CRYPTO_UTILS.hashPin(newPin);
-        localStorage.setItem(APP_CONFIG.adminPinHashKey, newHash);
-        return { success: true };
+        if (!CLOUD_SYNC_MANAGER.active) {
+          return { success: false, offline: true };
+        }
+        try {
+          const { httpsCallable } = window.FirebaseLib;
+          const fn  = httpsCallable(CLOUD_SYNC_MANAGER.functions, 'changeAdminPin');
+          const res = await fn({ currentPin, newPin });
+          return res.data;
+        } catch (e) {
+          console.error('changeAdminPin call failed', e);
+          return { success: false, error: true };
+        }
       }
 
-      return { ensureDefaultPin, verify, changePin, getLockoutStatus };
+      return { verify, changePin };
     })();
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -1067,7 +1001,7 @@
     // ⑥ CLOUD_SYNC_MANAGER — Firestore real-time sync with borrow transaction
     // ─────────────────────────────────────────────────────────────────────────
     const CLOUD_SYNC_MANAGER = (() => {
-      let _fs = null, _auth = null, _unsub = null, _messaging = null;
+      let _fs = null, _auth = null, _unsub = null, _messaging = null, _functions = null;
       let _active = false;
       let _appId = 'a-class-radiosync';
       try { if (typeof __app_id !== 'undefined') _appId = __app_id; } catch(e) {}
@@ -1076,11 +1010,12 @@
         if (!window.FirebaseLib) return false;
         try {
           const { initializeApp, getAuth, signInAnonymously, getFirestore, getMessaging,
-                  inMemoryPersistence, setPersistence } = window.FirebaseLib;
+                  getFunctions, inMemoryPersistence, setPersistence } = window.FirebaseLib;
           const app = initializeApp(config);
           _fs        = getFirestore(app);
           _auth      = getAuth(app);
           _messaging = getMessaging(app);
+          _functions = getFunctions(app);
           // Use in-memory persistence so auth works in LINE/Facebook WebViews
           // that block IndexedDB (the default browserLocalPersistence storage)
           await setPersistence(_auth, inMemoryPersistence);
@@ -1228,7 +1163,14 @@
           return out;
         },
 
-        get active() { return _active; }
+        // Force-refresh the ID token so Firestore picks up a just-granted
+        // 'admin' custom claim without a full page reload
+        async refreshAuthToken() {
+          if (_auth && _auth.currentUser) await _auth.currentUser.getIdToken(true);
+        },
+
+        get active() { return _active; },
+        get functions() { return _functions; }
       };
     })();
 
@@ -1816,11 +1758,9 @@
                     </div>
                   </div>`;
               }).join('');
-            } else {
-              // Show lockout state on lock screen if applicable
-              const lockout = PIN_GUARD.getLockoutStatus();
-              if (lockout.locked) this.showLockout(lockout.remainingMs);
             }
+            // Lockout state (if any) is now only known server-side; it surfaces
+            // via the toast/lockout screen when the user actually submits a PIN.
           }
 
           lucide.createIcons();
@@ -1868,7 +1808,6 @@
               .catch(e => console.warn('SW registration failed:', e.message));
           }
 
-          await PIN_GUARD.ensureDefaultPin();
           await _seed();
 
           // Search with debounce
@@ -2036,7 +1975,11 @@
           const pin = document.getElementById('admin-pin-input').value;
           const result = await PIN_GUARD.verify(pin);
 
-          if (result.success) {
+          if (result.offline) {
+            UI_RENDERER.showToast('ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อยืนยันตัวตนแอดมินค่ะ', 'error');
+          } else if (result.error) {
+            UI_RENDERER.showToast('เกิดข้อผิดพลาด กรุณาลองใหม่ค่ะ', 'error');
+          } else if (result.success) {
             STATE_STORE.set('adminAuthorized', true);
             SESSION_MANAGER.reset();
             UI_RENDERER.showToast('🔓 เข้าสู่ระบบแอดมินสำเร็จแล้วค่ะ', 'success');
@@ -2069,15 +2012,19 @@
           }
 
           const result = await PIN_GUARD.changePin(current, newPin);
-          if (result.success) {
+          if (result.offline) {
+            UI_RENDERER.showToast('ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อเปลี่ยนรหัส PIN ค่ะ', 'error');
+          } else if (result.success) {
             document.getElementById('change-pin-current').value = '';
             document.getElementById('change-pin-new').value     = '';
             document.getElementById('change-pin-confirm').value = '';
             UI_RENDERER.showToast('🔑 เปลี่ยนรหัส PIN สำเร็จแล้วค่ะ', 'success');
-          } else if (result.locked) {
-            UI_RENDERER.showToast('🔒 ระบบล็อกชั่วคราวค่ะ', 'error');
+          } else if (result.error === 'wrong-current-pin') {
+            UI_RENDERER.showToast('❌ รหัส PIN ปัจจุบันไม่ถูกต้องค่ะ', 'error');
+          } else if (result.error === 'invalid-format') {
+            UI_RENDERER.showToast('รหัส PIN ใหม่ต้องเป็นตัวเลข 4 หลักเท่านั้นค่ะ', 'error');
           } else {
-            UI_RENDERER.showToast(`❌ รหัส PIN ปัจจุบันไม่ถูกต้องค่ะ (เหลือ ${result.remainingAttempts} ครั้ง)`, 'error');
+            UI_RENDERER.showToast('เกิดข้อผิดพลาด กรุณาลองใหม่ค่ะ', 'error');
           }
         },
 
