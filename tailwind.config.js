@@ -11,15 +11,15 @@ module.exports = {
       colors: {
         brand: {
           DEFAULT: '#2563eb',
-          light: '#60a5fa',
+          light: '#1d4ed8',
           dark: '#1e40af',
           glow: 'rgba(37, 99, 235, 0.15)'
         },
         surface: {
-          page: '#0f0f12',
-          card: '#18181c',
-          raised: '#22222a',
-          overlay: '#2d2d38'
+          page: '#f5f8fc',
+          card: '#ffffff',
+          raised: '#eef3fa',
+          overlay: '#e2e9f5'
         }
       }
     }

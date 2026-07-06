@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="dark scroll-smooth">
+<html lang="th" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -9,7 +9,7 @@
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,17 +27,17 @@
     p, li { line-height: 1.75; }
 
     .glass {
-      background: rgba(24, 24, 28, 0.75);
+      background: rgba(255, 255, 255, 0.72);
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(15, 23, 42, 0.08);
       border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.06);
     }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f0f12; }
-    ::-webkit-scrollbar-thumb { background: #2d2d38; border-radius: 999px; }
+    ::-webkit-scrollbar-track { background: #f5f8fc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
 
     @keyframes pulse-glow {
@@ -55,9 +55,9 @@
     }
     .skeleton {
       background: linear-gradient(90deg,
-        rgba(255,255,255,.03) 25%,
-        rgba(255,255,255,.10) 37%,
-        rgba(255,255,255,.03) 63%);
+        rgba(15,23,42,.06) 25%,
+        rgba(15,23,42,.12) 37%,
+        rgba(15,23,42,.06) 63%);
       background-size: 400% 100%;
       animation: shimmer 1.5s ease infinite;
     }
@@ -66,7 +66,7 @@
   </style>
 </head>
 
-<body class="bg-surface-page text-gray-100 font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-surface-page text-gray-900 font-sans min-h-screen flex flex-col antialiased">
 
   <!-- LINE soft banner (non-blocking) — hidden by default, shown if LINE UA detected -->
   <div id="line-banner" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-200 text-xs py-2 px-4 flex items-center justify-center gap-2 flex-wrap">
@@ -133,13 +133,13 @@
           <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
         </div>
         <div>
-          <h1 class="font-display font-semibold text-lg tracking-tight leading-none text-white">PE1 Walkie Talkie</h1>
-          <span class="text-[10px] text-gray-400 tracking-wider uppercase font-medium">A-Class WebCraft</span>
+          <h1 class="font-display font-semibold text-lg tracking-tight leading-none text-gray-900">PE1 Walkie Talkie</h1>
+          <span class="text-[10px] text-gray-500 tracking-wider uppercase font-medium">A-Class WebCraft</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <span id="sync-glow" class="w-2.5 h-2.5 rounded-full bg-amber-500 pulse-amber" title="สถานะการเชื่อมต่อ"></span>
-        <span id="sync-text" class="text-xs text-gray-400 font-medium">เซฟในเครื่อง</span>
+        <span id="sync-text" class="text-xs text-gray-500 font-medium">เซฟในเครื่อง</span>
       </div>
     </div>
   </header>
@@ -162,10 +162,10 @@
         </div>
         <div>
           <p class="text-xs text-brand-light font-medium">ผู้ลงทะเบียนใช้งาน</p>
-          <p id="active-user-name" class="text-sm font-semibold text-white">-</p>
+          <p id="active-user-name" class="text-sm font-semibold text-gray-900">-</p>
         </div>
       </div>
-      <button onclick="STATE_STORE.logout()" class="p-1.5 hover:bg-white/5 text-gray-400 hover:text-red-400 rounded-lg transition btn-active" title="เปลี่ยนผู้ใช้งาน">
+      <button onclick="STATE_STORE.logout()" class="p-1.5 hover:bg-slate-900/5 text-gray-500 hover:text-red-600 rounded-lg transition btn-active" title="เปลี่ยนผู้ใช้งาน">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </button>
     </div>
@@ -175,10 +175,10 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-[10px] text-brand-light tracking-widest uppercase font-semibold">Radio Available</p>
-          <h2 class="font-display font-medium text-xl text-white">เลือกยืมวิทยุสื่อสาร</h2>
+          <h2 class="font-display font-medium text-xl text-gray-900">เลือกยืมวิทยุสื่อสาร</h2>
         </div>
         <div class="flex items-center gap-2">
-          <div id="equip-count-badge" class="bg-surface-raised px-3 py-1 rounded-full text-xs text-gray-300 font-medium border border-white/5">
+          <div id="equip-count-badge" class="bg-surface-raised px-3 py-1 rounded-full text-xs text-gray-600 font-medium border border-slate-900/5">
             ว่าง -- เครื่อง
           </div>
           <button onclick="document.getElementById('help-modal').classList.remove('invisible','opacity-0'); document.getElementById('help-modal').classList.add('opacity-100')"
@@ -193,9 +193,9 @@
           <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
         </div>
         <input type="text" id="search-input" placeholder="ค้นหาเลขวิทยุ หรือชื่อเครื่อง..."
-          class="w-full bg-surface-card border border-white/10 hover:border-white/20 focus:border-brand rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-glow transition duration-220" />
+          class="w-full bg-surface-card border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl pl-10 pr-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-glow transition duration-220" />
         <button id="clear-search-btn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center">
-          <i data-lucide="x" class="w-4 h-4 text-gray-500 hover:text-gray-300"></i>
+          <i data-lucide="x" class="w-4 h-4 text-gray-500 hover:text-gray-600"></i>
         </button>
       </div>
       <div id="equipment-list" class="grid grid-cols-1 gap-3">
@@ -209,24 +209,24 @@
     <section id="tab-status-content" class="hidden space-y-4">
       <div>
         <p class="text-[10px] text-brand-light tracking-widest uppercase font-semibold">User Dashboard</p>
-        <h2 class="font-display font-medium text-xl text-white">สถานะการยืมของฉัน</h2>
+        <h2 class="font-display font-medium text-xl text-gray-900">สถานะการยืมของฉัน</h2>
       </div>
       <div id="status-not-logged-in" class="glass p-6 text-center space-y-4">
         <div class="w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center mx-auto">
           <i data-lucide="user-check" class="w-6 h-6 text-brand-light"></i>
         </div>
         <div>
-          <h3 class="text-sm font-semibold text-white">โปรดลงทะเบียนพนักงานเพื่อดูประวัติ</h3>
-          <p class="text-xs text-gray-400 mt-1">กรอกชื่อและรหัสของคุณในแท็บยืมของเพื่อสร้างโปรไฟล์ก่อนนะคะ</p>
+          <h3 class="text-sm font-semibold text-gray-900">โปรดลงทะเบียนพนักงานเพื่อดูประวัติ</h3>
+          <p class="text-xs text-gray-500 mt-1">กรอกชื่อและรหัสของคุณในแท็บยืมของเพื่อสร้างโปรไฟล์ก่อนนะคะ</p>
         </div>
       </div>
       <div id="status-dashboard" class="hidden space-y-4">
         <div class="space-y-3">
-          <h3 class="text-xs text-gray-400 font-semibold uppercase tracking-wider">วิทยุที่กำลังถือครองอยู่</h3>
+          <h3 class="text-xs text-gray-500 font-semibold uppercase tracking-wider">วิทยุที่กำลังถือครองอยู่</h3>
           <div id="my-active-borrowed-list" class="space-y-3"></div>
         </div>
-        <div class="space-y-3 pt-4 border-t border-white/5">
-          <h3 class="text-xs text-gray-400 font-semibold uppercase tracking-wider">อยู่ระหว่างให้ Admin ตรวจรับคืน</h3>
+        <div class="space-y-3 pt-4 border-t border-slate-900/5">
+          <h3 class="text-xs text-gray-500 font-semibold uppercase tracking-wider">อยู่ระหว่างให้ Admin ตรวจรับคืน</h3>
           <div id="my-pending-returns-list" class="space-y-3"></div>
         </div>
       </div>
@@ -236,7 +236,7 @@
     <section id="tab-admin-content" class="hidden space-y-4">
       <div>
         <p class="text-[10px] text-brand-light tracking-widest uppercase font-semibold">Control Room</p>
-        <h2 class="font-display font-medium text-xl text-white">แผงควบคุมแอดมิน</h2>
+        <h2 class="font-display font-medium text-xl text-gray-900">แผงควบคุมแอดมิน</h2>
       </div>
 
       <!-- Admin Lock Screen -->
@@ -245,23 +245,23 @@
           <i data-lucide="shield-check" class="w-6 h-6 text-brand-light"></i>
         </div>
         <div>
-          <h3 class="text-sm font-semibold text-white text-center">ระบบความปลอดภัย</h3>
-          <p class="text-xs text-gray-400 mt-1">กรุณากรอกรหัส PIN แอดมิน 4 หลักเพื่อเข้าถึงระบบ</p>
+          <h3 class="text-sm font-semibold text-gray-900 text-center">ระบบความปลอดภัย</h3>
+          <p class="text-xs text-gray-500 mt-1">กรุณากรอกรหัส PIN แอดมิน 4 หลักเพื่อเข้าถึงระบบ</p>
         </div>
 
         <!-- Lockout message (hidden by default) -->
         <div id="admin-lockout-msg" class="hidden py-2 px-3 bg-red-500/10 rounded-lg border border-red-500/20">
-          <p class="text-xs text-red-400">🔒 ระบบล็อกชั่วคราว รอ <span id="admin-lockout-countdown" class="font-bold tabular-nums">5:00</span></p>
+          <p class="text-xs text-red-600">🔒 ระบบล็อกชั่วคราว รอ <span id="admin-lockout-countdown" class="font-bold tabular-nums">5:00</span></p>
         </div>
 
         <!-- Remaining attempts warning (hidden by default) -->
         <div id="admin-attempts-msg" class="hidden">
-          <p class="text-xs text-amber-400">⚠️ เหลืออีก <span id="admin-attempts-left" class="font-bold">5</span> ครั้ง ก่อนถูกล็อก</p>
+          <p class="text-xs text-amber-600">⚠️ เหลืออีก <span id="admin-attempts-left" class="font-bold">5</span> ครั้ง ก่อนถูกล็อก</p>
         </div>
 
         <div class="max-w-[200px] mx-auto">
           <input type="password" id="admin-pin-input" maxlength="4" placeholder="● ● ● ●"
-            class="w-full text-center tracking-widest bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl py-2.5 text-lg font-semibold text-white focus:outline-none transition"
+            class="w-full text-center tracking-widest bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl py-2.5 text-lg font-semibold text-gray-900 focus:outline-none transition"
             onkeydown="if(event.key==='Enter') APP_CORE.verifyAdminPin()" />
         </div>
         <button onclick="APP_CORE.verifyAdminPin()" class="w-full bg-brand hover:bg-brand-dark text-white font-medium text-sm py-2.5 rounded-xl transition duration-220 btn-active">
@@ -276,7 +276,7 @@
         <div class="flex items-center justify-between px-1">
           <span class="text-[10px] text-gray-500 flex items-center gap-1">
             <i data-lucide="clock" class="w-3 h-3"></i>
-            หมดเวลาเซสชันใน <span id="session-countdown" class="text-gray-400 font-medium tabular-nums ml-1">15:00</span>
+            หมดเวลาเซสชันใน <span id="session-countdown" class="text-gray-500 font-medium tabular-nums ml-1">15:00</span>
           </span>
           <div class="flex items-center gap-3">
             <button id="notif-toggle-btn" onclick="APP_CORE.requestNotificationPermission()"
@@ -291,34 +291,34 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-3 gap-3">
-          <div class="bg-surface-card border border-white/5 rounded-xl p-3 flex flex-col justify-between h-24">
-            <span class="text-[11px] text-gray-400 font-medium leading-tight">อุปกรณ์ทั้งหมด</span>
-            <span id="admin-stat-total" class="font-display text-2xl font-bold text-white">0</span>
+          <div class="bg-surface-card border border-slate-900/5 rounded-xl p-3 flex flex-col justify-between h-24">
+            <span class="text-[11px] text-gray-500 font-medium leading-tight">อุปกรณ์ทั้งหมด</span>
+            <span id="admin-stat-total" class="font-display text-2xl font-bold text-gray-900">0</span>
           </div>
-          <div class="bg-surface-card border border-white/5 rounded-xl p-3 flex flex-col justify-between h-24">
-            <span class="text-[11px] text-gray-400 font-medium leading-tight">ยืมอยู่ / รอยืนยัน</span>
+          <div class="bg-surface-card border border-slate-900/5 rounded-xl p-3 flex flex-col justify-between h-24">
+            <span class="text-[11px] text-gray-500 font-medium leading-tight">ยืมอยู่ / รอยืนยัน</span>
             <span id="admin-stat-borrowed" class="font-display text-2xl font-bold text-brand-light">0</span>
           </div>
           <div class="bg-surface-card border border-red-500/20 rounded-xl p-3 flex flex-col justify-between h-24">
-            <span class="text-[11px] text-gray-400 font-medium leading-tight">เกินกำหนด</span>
-            <span id="admin-stat-overdue" class="font-display text-2xl font-bold text-red-400">0</span>
+            <span class="text-[11px] text-gray-500 font-medium leading-tight">เกินกำหนด</span>
+            <span id="admin-stat-overdue" class="font-display text-2xl font-bold text-red-600">0</span>
           </div>
         </div>
 
         <!-- Overdue threshold setting -->
-        <div class="bg-surface-card border border-white/5 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-          <span class="text-xs text-gray-400 font-medium">แจ้งเตือน "เกินกำหนด" เมื่อยืมเกิน</span>
+        <div class="bg-surface-card border border-slate-900/5 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <span class="text-xs text-gray-500 font-medium">แจ้งเตือน "เกินกำหนด" เมื่อยืมเกิน</span>
           <div class="flex items-center gap-2 shrink-0">
             <input type="number" id="overdue-days-input" min="1" max="365"
               onchange="APP_CORE.setOverdueDays(this.value)"
-              class="w-16 bg-surface-raised border border-white/10 focus:border-brand rounded-lg px-2 py-1.5 text-xs text-white text-center focus:outline-none transition" />
-            <span class="text-xs text-gray-400">วัน</span>
+              class="w-16 bg-surface-raised border border-slate-900/10 focus:border-brand rounded-lg px-2 py-1.5 text-xs text-gray-900 text-center focus:outline-none transition" />
+            <span class="text-xs text-gray-500">วัน</span>
           </div>
         </div>
 
         <!-- 1. Pending Approvals -->
         <div class="space-y-3">
-          <h3 class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+          <h3 class="text-xs font-semibold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="clock" class="w-3.5 h-3.5"></i>
             รายการรออนุมัติรับคืน
           </h3>
@@ -330,21 +330,21 @@
         </div>
 
         <!-- 2. Add Equipment -->
-        <div class="bg-surface-card border border-white/5 rounded-xl p-4 space-y-4">
-          <h3 class="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
+        <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 space-y-4">
+          <h3 class="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="plus-circle" class="w-4 h-4 text-brand-light"></i>
             เพิ่มอุปกรณ์วิทยุใหม่
           </h3>
           <div class="grid grid-cols-1 gap-3">
             <div>
-              <label for="new-equip-name" class="block text-[11px] text-gray-400 uppercase font-medium mb-1">ชื่อเครื่องย่อ</label>
+              <label for="new-equip-name" class="block text-[11px] text-gray-500 uppercase font-medium mb-1">ชื่อเครื่องย่อ</label>
               <input type="text" id="new-equip-name" placeholder="Radio No.XX"
-                class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-lg px-3 py-2 text-xs text-white focus:outline-none transition">
+                class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-lg px-3 py-2 text-xs text-gray-900 focus:outline-none transition">
             </div>
             <div>
-              <label for="new-equip-serial" class="block text-[11px] text-gray-400 uppercase font-medium mb-1">หมายเลขเฉพาะเครื่อง (Serial / ID)</label>
+              <label for="new-equip-serial" class="block text-[11px] text-gray-500 uppercase font-medium mb-1">หมายเลขเฉพาะเครื่อง (Serial / ID)</label>
               <input type="text" id="new-equip-serial" placeholder="400105"
-                class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-lg px-3 py-2 text-xs text-white focus:outline-none transition">
+                class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-lg px-3 py-2 text-xs text-gray-900 focus:outline-none transition">
             </div>
           </div>
           <button onclick="APP_CORE.addEquipmentFromAdmin()" class="w-full bg-brand/20 hover:bg-brand/30 text-brand-light font-medium text-xs py-2.5 rounded-lg border border-brand/30 transition btn-active">
@@ -354,7 +354,7 @@
 
         <!-- 3. Inventory List -->
         <div class="space-y-3">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="package" class="w-3.5 h-3.5"></i>
             คลังอุปกรณ์ทั้งหมด
           </h3>
@@ -362,12 +362,12 @@
         </div>
 
         <!-- 4. CSV Export -->
-        <div class="bg-surface-card border border-white/5 rounded-xl p-4 space-y-3">
-          <h3 class="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-green-400"></i>
+        <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 space-y-3">
+          <h3 class="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-green-600"></i>
             รายงานประวัติส่งต่อ Microsoft Office 365
           </h3>
-          <p class="text-xs text-gray-400 leading-relaxed">ดูประวัติในแอป หรือดาวน์โหลดเป็นไฟล์ Excel (CSV)</p>
+          <p class="text-xs text-gray-500 leading-relaxed">ดูประวัติในแอป หรือดาวน์โหลดเป็นไฟล์ Excel (CSV)</p>
           <button onclick="APP_CORE.openHistory()" class="w-full bg-brand/20 hover:bg-brand/30 text-brand-light font-medium text-xs py-2.5 rounded-lg border border-brand/30 flex items-center justify-center gap-1.5 transition btn-active">
             <i data-lucide="history" class="w-3.5 h-3.5"></i>
             📜 ดูประวัติในแอป
@@ -377,25 +377,25 @@
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               ดาวน์โหลดประวัติทั้งหมด (Excel)
             </button>
-            <button onclick="APP_CORE.clearLocalLogs()" class="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs transition btn-active" title="ล้างประวัติเครื่องทั้งหมด">
+            <button onclick="APP_CORE.clearLocalLogs()" class="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 rounded-lg text-xs transition btn-active" title="ล้างประวัติเครื่องทั้งหมด">
               ล้างประวัติ
             </button>
           </div>
         </div>
 
         <!-- 5. Change PIN -->
-        <div class="bg-surface-card border border-white/5 rounded-xl p-4 space-y-3">
-          <h3 class="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+        <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 space-y-3">
+          <h3 class="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="key" class="w-4 h-4 text-amber-600"></i>
             เปลี่ยนรหัส PIN แอดมิน
           </h3>
           <div class="space-y-2">
             <input type="password" id="change-pin-current" maxlength="4" placeholder="รหัส PIN ปัจจุบัน"
-              class="w-full text-center tracking-widest bg-surface-raised border border-white/10 focus:border-brand rounded-lg py-2 text-sm text-white focus:outline-none transition">
+              class="w-full text-center tracking-widest bg-surface-raised border border-slate-900/10 focus:border-brand rounded-lg py-2 text-sm text-gray-900 focus:outline-none transition">
             <input type="password" id="change-pin-new" maxlength="4" placeholder="รหัส PIN ใหม่ (4 หลัก)"
-              class="w-full text-center tracking-widest bg-surface-raised border border-white/10 focus:border-brand rounded-lg py-2 text-sm text-white focus:outline-none transition">
+              class="w-full text-center tracking-widest bg-surface-raised border border-slate-900/10 focus:border-brand rounded-lg py-2 text-sm text-gray-900 focus:outline-none transition">
             <input type="password" id="change-pin-confirm" maxlength="4" placeholder="ยืนยันรหัส PIN ใหม่"
-              class="w-full text-center tracking-widest bg-surface-raised border border-white/10 focus:border-brand rounded-lg py-2 text-sm text-white focus:outline-none transition">
+              class="w-full text-center tracking-widest bg-surface-raised border border-slate-900/10 focus:border-brand rounded-lg py-2 text-sm text-gray-900 focus:outline-none transition">
             <button onclick="APP_CORE.changeAdminPin()" class="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-medium text-xs py-2.5 rounded-lg border border-amber-500/30 transition btn-active">
               🔑 บันทึกรหัส PIN ใหม่
             </button>
@@ -403,19 +403,19 @@
         </div>
 
         <!-- 6. Firestore Config (always-on, embedded) -->
-        <div class="bg-surface-card border border-white/5 rounded-xl p-4 space-y-3">
+        <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="cloud-lightning" class="w-4 h-4 text-blue-400"></i>
+            <h3 class="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="cloud-lightning" class="w-4 h-4 text-blue-600"></i>
               คลาวด์ซิงค์เรียลไทม์ (Firestore)
             </h3>
-            <span class="text-[10px] bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">
+            <span class="text-[10px] bg-green-500/10 border border-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">
               ⚡ เปิดตลอด
             </span>
           </div>
-          <div class="flex items-center gap-2 text-[11px] text-gray-400 bg-surface-raised rounded-lg px-3 py-2">
-            <i data-lucide="database" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i>
-            <span>Project: <span class="text-white font-medium">radiosync-6662c</span> · Spark (ฟรี)</span>
+          <div class="flex items-center gap-2 text-[11px] text-gray-500 bg-surface-raised rounded-lg px-3 py-2">
+            <i data-lucide="database" class="w-3.5 h-3.5 text-blue-600 shrink-0"></i>
+            <span>Project: <span class="text-gray-900 font-medium">radiosync-6662c</span> · Spark (ฟรี)</span>
           </div>
           <!-- Hidden inputs kept for internal use -->
           <input type="checkbox" id="cloud-sync-toggle" class="hidden" checked>
@@ -423,7 +423,7 @@
         </div>
 
         <div class="text-center pt-2">
-          <button onclick="APP_CORE.logoutAdmin()" class="px-4 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-white/5 rounded-lg transition btn-active">
+          <button onclick="APP_CORE.logoutAdmin()" class="px-4 py-2 text-xs text-red-600 hover:text-red-300 hover:bg-slate-900/5 rounded-lg transition btn-active">
             🔒 ออกจากระบบผู้ดูแล
           </button>
         </div>
@@ -435,18 +435,18 @@
   <div id="borrow-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300 flex flex-col justify-end">
     <div onclick="UI_RENDERER.closeBorrowDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full max-h-[90vh] overflow-y-auto px-6 py-6 space-y-6 transform translate-y-full transition-transform duration-300" id="borrow-drawer-sheet">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-900/10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center">
             <i data-lucide="edit-3" class="w-4 h-4 text-brand-light"></i>
           </div>
           <div>
-            <h3 class="font-display font-medium text-lg text-white">แบบฟอร์มลงบันทึกการยืม</h3>
+            <h3 class="font-display font-medium text-lg text-gray-900">แบบฟอร์มลงบันทึกการยืม</h3>
             <p class="text-[10px] text-brand-light font-semibold uppercase">Borrow Registration Form</p>
           </div>
         </div>
-        <button onclick="UI_RENDERER.closeBorrowDrawer()" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        <button onclick="UI_RENDERER.closeBorrowDrawer()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
         </button>
       </div>
       <div class="bg-brand/10 border border-brand/20 rounded-xl p-4 flex items-center justify-between">
@@ -455,24 +455,24 @@
             <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
           </div>
           <div>
-            <p id="drawer-equip-name" class="text-sm font-semibold text-white">-</p>
-            <p id="drawer-equip-serial" class="text-xs text-gray-400">S/N: -</p>
+            <p id="drawer-equip-name" class="text-sm font-semibold text-gray-900">-</p>
+            <p id="drawer-equip-serial" class="text-xs text-gray-500">S/N: -</p>
           </div>
         </div>
-        <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-medium">🟢 ว่างพร้อมยืม</span>
+        <span class="bg-green-500/10 border border-green-500/20 text-green-600 text-[10px] px-2 py-0.5 rounded-full font-medium">🟢 ว่างพร้อมยืม</span>
       </div>
       <div class="space-y-4">
         <div>
-          <label for="form-employee-id" class="block text-xs text-gray-400 font-medium mb-1.5">รหัสพนักงาน <span class="text-red-400">*</span></label>
+          <label for="form-employee-id" class="block text-xs text-gray-500 font-medium mb-1.5">รหัสพนักงาน <span class="text-red-600">*</span></label>
           <input type="text" id="form-employee-id" placeholder="เช่น 74012"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
-          <span id="err-employee-id" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกรหัสพนักงาน</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-employee-id" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกรหัสพนักงาน</span>
         </div>
         <div>
-          <label for="form-employee-name" class="block text-xs text-gray-400 font-medium mb-1.5">ชื่อ - นามสกุล <span class="text-red-400">*</span></label>
+          <label for="form-employee-name" class="block text-xs text-gray-500 font-medium mb-1.5">ชื่อ - นามสกุล <span class="text-red-600">*</span></label>
           <input type="text" id="form-employee-name" placeholder="เช่น สมชาย ใจดี"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
-          <span id="err-employee-name" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกชื่อ-นามสกุลพนักงาน</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-employee-name" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกชื่อ-นามสกุลพนักงาน</span>
         </div>
       </div>
       <button onclick="APP_CORE.submitBorrowRegistration()" class="w-full bg-brand hover:bg-brand-dark text-white font-medium text-sm py-3.5 rounded-xl transition duration-220 shadow-lg shadow-brand/20 flex items-center justify-center gap-1.5 btn-active">
@@ -486,53 +486,53 @@
   <div id="admin-override-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300 flex flex-col justify-end">
     <div onclick="UI_RENDERER.closeOverrideDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full max-h-[90vh] overflow-y-auto px-6 py-6 space-y-6 transform translate-y-full transition-transform duration-300" id="admin-override-sheet">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-900/10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
           </div>
           <div>
-            <h3 id="override-title" class="font-display font-medium text-lg text-white">-</h3>
-            <p class="text-[10px] text-amber-400 font-semibold uppercase">Admin Override</p>
+            <h3 id="override-title" class="font-display font-medium text-lg text-gray-900">-</h3>
+            <p class="text-[10px] text-amber-600 font-semibold uppercase">Admin Override</p>
           </div>
         </div>
-        <button onclick="UI_RENDERER.closeOverrideDrawer()" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        <button onclick="UI_RENDERER.closeOverrideDrawer()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
         </button>
       </div>
-      <div class="bg-surface-raised border border-white/10 rounded-xl p-4 flex items-center gap-3">
+      <div class="bg-surface-raised border border-slate-900/10 rounded-xl p-4 flex items-center gap-3">
         <div class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center shrink-0">
           <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
         </div>
         <div>
-          <p id="override-equip-name" class="text-sm font-semibold text-white">-</p>
-          <p id="override-current-holder" class="text-xs text-gray-400">-</p>
+          <p id="override-equip-name" class="text-sm font-semibold text-gray-900">-</p>
+          <p id="override-current-holder" class="text-xs text-gray-500">-</p>
         </div>
       </div>
 
       <!-- Recall mode -->
       <div id="override-recall-fields" class="hidden space-y-4">
         <div>
-          <label for="recall-reason" class="block text-xs text-gray-400 font-medium mb-1.5">เหตุผลในการเรียกคืน <span class="text-red-400">*</span></label>
+          <label for="recall-reason" class="block text-xs text-gray-500 font-medium mb-1.5">เหตุผลในการเรียกคืน <span class="text-red-600">*</span></label>
           <textarea id="recall-reason" rows="3" placeholder="เช่น พนักงานลาออก / ลืมส่งคืน / เครื่องสูญหาย"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220 resize-none"></textarea>
-          <span id="err-recall-reason" class="hidden text-xs text-red-400 mt-1 block">กรุณาระบุเหตุผลในการเรียกคืน</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition duration-220 resize-none"></textarea>
+          <span id="err-recall-reason" class="hidden text-xs text-red-600 mt-1 block">กรุณาระบุเหตุผลในการเรียกคืน</span>
         </div>
       </div>
 
       <!-- Reassign mode -->
       <div id="override-reassign-fields" class="hidden space-y-4">
         <div>
-          <label for="reassign-empid" class="block text-xs text-gray-400 font-medium mb-1.5">รหัสพนักงานผู้รับเครื่องใหม่ <span class="text-red-400">*</span></label>
+          <label for="reassign-empid" class="block text-xs text-gray-500 font-medium mb-1.5">รหัสพนักงานผู้รับเครื่องใหม่ <span class="text-red-600">*</span></label>
           <input type="text" id="reassign-empid" placeholder="เช่น 74012"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
-          <span id="err-reassign-empid" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกรหัสพนักงาน</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-reassign-empid" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกรหัสพนักงาน</span>
         </div>
         <div>
-          <label for="reassign-name" class="block text-xs text-gray-400 font-medium mb-1.5">ชื่อ - นามสกุล ผู้รับเครื่องใหม่ <span class="text-red-400">*</span></label>
+          <label for="reassign-name" class="block text-xs text-gray-500 font-medium mb-1.5">ชื่อ - นามสกุล ผู้รับเครื่องใหม่ <span class="text-red-600">*</span></label>
           <input type="text" id="reassign-name" placeholder="เช่น สมชาย ใจดี"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition duration-220" />
-          <span id="err-reassign-name" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกชื่อ-นามสกุล</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition duration-220" />
+          <span id="err-reassign-name" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกชื่อ-นามสกุล</span>
         </div>
       </div>
 
@@ -547,25 +547,25 @@
   <div id="history-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300 flex flex-col justify-end">
     <div onclick="UI_RENDERER.closeHistory()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full max-h-[90vh] flex flex-col px-6 py-6 transform translate-y-full transition-transform duration-300" id="history-sheet">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-900/10 shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center">
             <i data-lucide="history" class="w-4 h-4 text-brand-light"></i>
           </div>
           <div>
-            <h3 class="font-display font-medium text-lg text-white">ประวัติการทำรายการ</h3>
+            <h3 class="font-display font-medium text-lg text-gray-900">ประวัติการทำรายการ</h3>
             <p class="text-[10px] text-brand-light font-semibold uppercase">Activity History</p>
           </div>
         </div>
-        <button onclick="UI_RENDERER.closeHistory()" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        <button onclick="UI_RENDERER.closeHistory()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
         </button>
       </div>
       <div class="pt-4 space-y-3 shrink-0">
         <div class="relative">
           <i data-lucide="search" class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
           <input type="text" id="history-search" oninput="APP_CORE.applyHistoryFilter()" placeholder="ค้นหาเครื่อง / ชื่อ / รหัสพนักงาน"
-            class="w-full bg-surface-raised border border-white/10 focus:border-brand rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition" />
+            class="w-full bg-surface-raised border border-slate-900/10 focus:border-brand rounded-xl pl-9 pr-3 py-2.5 text-xs text-gray-900 placeholder-gray-500 focus:outline-none transition" />
         </div>
         <div id="history-chips" class="flex gap-1.5 flex-wrap"></div>
       </div>
@@ -578,18 +578,18 @@
   <!-- CONFIRM MODAL -->
   <div id="custom-modal" class="fixed inset-0 z-50 invisible flex items-center justify-center px-4 transition-all duration-300">
     <div onclick="UI_RENDERER.closeCustomModal()" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-    <div class="relative glass bg-surface-card p-6 rounded-xl w-full max-w-sm border border-white/10 space-y-4 shadow-xl transform scale-95 transition-all duration-300" id="custom-modal-body">
+    <div class="relative glass bg-surface-card p-6 rounded-xl w-full max-w-sm border border-slate-900/10 space-y-4 shadow-xl transform scale-95 transition-all duration-300" id="custom-modal-body">
       <div class="flex items-start gap-4">
         <div id="modal-icon-bg" class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center shrink-0 border border-brand/20">
           <i id="modal-icon" data-lucide="info" class="w-5 h-5 text-brand-light"></i>
         </div>
         <div class="space-y-1">
-          <h3 id="modal-title" class="font-display font-medium text-base text-white">ยืนยัน</h3>
-          <p id="modal-desc" class="text-xs text-gray-400 leading-relaxed">-</p>
+          <h3 id="modal-title" class="font-display font-medium text-base text-gray-900">ยืนยัน</h3>
+          <p id="modal-desc" class="text-xs text-gray-500 leading-relaxed">-</p>
         </div>
       </div>
       <div id="modal-action-row" class="flex items-center justify-end gap-2.5 pt-2">
-        <button id="modal-cancel-btn" onclick="UI_RENDERER.closeCustomModal()" class="px-4 py-2 hover:bg-white/5 rounded-lg text-xs text-gray-300 font-medium transition duration-220 btn-active">ยกเลิก</button>
+        <button id="modal-cancel-btn" onclick="UI_RENDERER.closeCustomModal()" class="px-4 py-2 hover:bg-slate-900/5 rounded-lg text-xs text-gray-600 font-medium transition duration-220 btn-active">ยกเลิก</button>
         <button id="modal-confirm-btn" class="px-4 py-2 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-medium transition duration-220 btn-active">ยืนยัน</button>
       </div>
     </div>
@@ -600,18 +600,18 @@
     <div onclick="UI_RENDERER.closeEditDrawer()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full px-6 py-6 space-y-6 transform translate-y-full transition-transform duration-300" id="edit-drawer-sheet">
 
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-900/10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <i data-lucide="pencil" class="w-4 h-4 text-amber-400"></i>
+            <i data-lucide="pencil" class="w-4 h-4 text-amber-600"></i>
           </div>
           <div>
-            <h3 class="font-display font-medium text-lg text-white">แก้ไขข้อมูลวิทยุ</h3>
-            <p class="text-[10px] text-amber-400 font-semibold uppercase">Edit Equipment</p>
+            <h3 class="font-display font-medium text-lg text-gray-900">แก้ไขข้อมูลวิทยุ</h3>
+            <p class="text-[10px] text-amber-600 font-semibold uppercase">Edit Equipment</p>
           </div>
         </div>
-        <button onclick="UI_RENDERER.closeEditDrawer()" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        <button onclick="UI_RENDERER.closeEditDrawer()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
         </button>
       </div>
 
@@ -619,16 +619,16 @@
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs text-gray-400 font-medium mb-1.5">ชื่อเครื่องย่อ <span class="text-red-400">*</span></label>
+          <label class="block text-xs text-gray-500 font-medium mb-1.5">ชื่อเครื่องย่อ <span class="text-red-600">*</span></label>
           <input type="text" id="edit-equip-name" placeholder="Radio No.XX"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition" />
-          <span id="err-edit-name" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกชื่อเครื่อง</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition" />
+          <span id="err-edit-name" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกชื่อเครื่อง</span>
         </div>
         <div>
-          <label class="block text-xs text-gray-400 font-medium mb-1.5">หมายเลขเฉพาะเครื่อง (Serial / ID) <span class="text-red-400">*</span></label>
+          <label class="block text-xs text-gray-500 font-medium mb-1.5">หมายเลขเฉพาะเครื่อง (Serial / ID) <span class="text-red-600">*</span></label>
           <input type="text" id="edit-equip-serial" placeholder="400105"
-            class="w-full bg-surface-raised border border-white/10 hover:border-white/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition" />
-          <span id="err-edit-serial" class="hidden text-xs text-red-400 mt-1 block">กรุณากรอกหมายเลขเครื่อง</span>
+            class="w-full bg-surface-raised border border-slate-900/10 hover:border-slate-900/20 focus:border-brand rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-500 focus:outline-none transition" />
+          <span id="err-edit-serial" class="hidden text-xs text-red-600 mt-1 block">กรุณากรอกหมายเลขเครื่อง</span>
         </div>
       </div>
 
@@ -647,18 +647,18 @@
     <div onclick="document.getElementById('help-modal').classList.add('invisible','opacity-0')" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
     <div class="relative glass bg-surface-card rounded-t-2xl rounded-b-none border-b-0 max-w-md mx-auto w-full max-h-[88vh] overflow-y-auto px-6 py-6 space-y-5">
       <!-- Header -->
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-900/10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center">
             <i data-lucide="book-open" class="w-4 h-4 text-brand-light"></i>
           </div>
           <div>
-            <h3 class="font-display font-medium text-lg text-white">คู่มือการยืม-คืนวิทยุ</h3>
+            <h3 class="font-display font-medium text-lg text-gray-900">คู่มือการยืม-คืนวิทยุ</h3>
             <p class="text-[10px] text-brand-light font-semibold uppercase">How To Borrow &amp; Return</p>
           </div>
         </div>
-        <button onclick="document.getElementById('help-modal').classList.add('invisible','opacity-0')" class="p-1.5 hover:bg-white/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        <button onclick="document.getElementById('help-modal').classList.add('invisible','opacity-0')" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
         </button>
       </div>
 
@@ -669,64 +669,64 @@
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-brand flex items-center justify-center shrink-0 text-xs font-bold text-white">1</div>
           <div>
-            <p class="text-sm font-semibold text-white">เลือกเครื่องที่ว่าง</p>
-            <p class="text-xs text-gray-400 mt-0.5">แตะที่การ์ดวิทยุที่มีสถานะ <span class="text-green-400 font-medium">🟢 ว่าง</span> เพื่อเปิดแบบฟอร์มยืม</p>
+            <p class="text-sm font-semibold text-gray-900">เลือกเครื่องที่ว่าง</p>
+            <p class="text-xs text-gray-500 mt-0.5">แตะที่การ์ดวิทยุที่มีสถานะ <span class="text-green-600 font-medium">🟢 ว่าง</span> เพื่อเปิดแบบฟอร์มยืม</p>
           </div>
         </div>
 
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-brand flex items-center justify-center shrink-0 text-xs font-bold text-white">2</div>
           <div>
-            <p class="text-sm font-semibold text-white">กรอกรหัสพนักงานและชื่อ</p>
-            <p class="text-xs text-gray-400 mt-0.5">กรอกรหัสพนักงาน และชื่อ-นามสกุลของคุณให้ครบถ้วน</p>
+            <p class="text-sm font-semibold text-gray-900">กรอกรหัสพนักงานและชื่อ</p>
+            <p class="text-xs text-gray-500 mt-0.5">กรอกรหัสพนักงาน และชื่อ-นามสกุลของคุณให้ครบถ้วน</p>
           </div>
         </div>
 
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-brand flex items-center justify-center shrink-0 text-xs font-bold text-white">3</div>
           <div>
-            <p class="text-sm font-semibold text-white">กด "ลงทะเบียนขอยืม"</p>
-            <p class="text-xs text-gray-400 mt-0.5">ระบบจะบันทึกข้อมูลทันที วิทยุจะเปลี่ยนสถานะเป็น <span class="text-red-400 font-medium">🔴 ถูกยืม</span></p>
+            <p class="text-sm font-semibold text-gray-900">กด "ลงทะเบียนขอยืม"</p>
+            <p class="text-xs text-gray-500 mt-0.5">ระบบจะบันทึกข้อมูลทันที วิทยุจะเปลี่ยนสถานะเป็น <span class="text-red-600 font-medium">🔴 ถูกยืม</span></p>
           </div>
         </div>
       </div>
 
       <!-- Divider -->
-      <div class="border-t border-white/5"></div>
+      <div class="border-t border-slate-900/5"></div>
 
       <!-- Steps: Return -->
       <div class="space-y-3">
-        <p class="text-[10px] text-amber-400 tracking-widest uppercase font-semibold">ขั้นตอนการคืนวิทยุ</p>
+        <p class="text-[10px] text-amber-600 tracking-widest uppercase font-semibold">ขั้นตอนการคืนวิทยุ</p>
 
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center shrink-0 text-xs font-bold text-white">1</div>
           <div>
-            <p class="text-sm font-semibold text-white">ไปที่แท็บ "สถานะของฉัน"</p>
-            <p class="text-xs text-gray-400 mt-0.5">ดูรายการวิทยุที่คุณกำลังถือครองอยู่</p>
+            <p class="text-sm font-semibold text-gray-900">ไปที่แท็บ "สถานะของฉัน"</p>
+            <p class="text-xs text-gray-500 mt-0.5">ดูรายการวิทยุที่คุณกำลังถือครองอยู่</p>
           </div>
         </div>
 
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center shrink-0 text-xs font-bold text-white">2</div>
           <div>
-            <p class="text-sm font-semibold text-white">กด "แจ้งคืน"</p>
-            <p class="text-xs text-gray-400 mt-0.5">วิทยุจะเปลี่ยนเป็นสถานะ <span class="text-amber-400 font-medium">🟡 รอตรวจรับ</span> และแจ้ง Admin โดยอัตโนมัติ</p>
+            <p class="text-sm font-semibold text-gray-900">กด "แจ้งคืน"</p>
+            <p class="text-xs text-gray-500 mt-0.5">วิทยุจะเปลี่ยนเป็นสถานะ <span class="text-amber-600 font-medium">🟡 รอตรวจรับ</span> และแจ้ง Admin โดยอัตโนมัติ</p>
           </div>
         </div>
 
         <div class="flex gap-3 items-start">
           <div class="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center shrink-0 text-xs font-bold text-white">3</div>
           <div>
-            <p class="text-sm font-semibold text-white">Admin ยืนยันรับคืน</p>
-            <p class="text-xs text-gray-400 mt-0.5">เมื่อ Admin กดยืนยัน วิทยุจะกลับสู่สถานะ <span class="text-green-400 font-medium">🟢 ว่าง</span> พร้อมให้ยืมใหม่</p>
+            <p class="text-sm font-semibold text-gray-900">Admin ยืนยันรับคืน</p>
+            <p class="text-xs text-gray-500 mt-0.5">เมื่อ Admin กดยืนยัน วิทยุจะกลับสู่สถานะ <span class="text-green-600 font-medium">🟢 ว่าง</span> พร้อมให้ยืมใหม่</p>
           </div>
         </div>
       </div>
 
       <!-- Note -->
-      <div class="bg-surface-raised border border-white/5 rounded-xl p-4 flex gap-3 items-start">
+      <div class="bg-surface-raised border border-slate-900/5 rounded-xl p-4 flex gap-3 items-start">
         <i data-lucide="info" class="w-4 h-4 text-brand-light shrink-0 mt-0.5"></i>
-        <p class="text-xs text-gray-400 leading-relaxed">ข้อมูลการยืม-คืนจะถูกบันทึกและซิงค์แบบ Real-time ทุกอุปกรณ์ ไม่ต้องรีเฟรชหน้า</p>
+        <p class="text-xs text-gray-500 leading-relaxed">ข้อมูลการยืม-คืนจะถูกบันทึกและซิงค์แบบ Real-time ทุกอุปกรณ์ ไม่ต้องรีเฟรชหน้า</p>
       </div>
 
       <button onclick="document.getElementById('help-modal').classList.add('invisible','opacity-0')" class="w-full bg-brand hover:bg-brand-dark text-white font-medium text-sm py-3 rounded-xl transition duration-220 btn-active">
@@ -736,17 +736,17 @@
   </div>
 
   <!-- BOTTOM NAV -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-page/90 backdrop-blur-md border-t border-white/[0.08]">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-page/90 backdrop-blur-md border-t border-slate-900/[0.08]">
     <div class="max-w-md mx-auto grid grid-cols-3 h-[68px]">
       <button onclick="UI_RENDERER.switchTab('borrow')" id="nav-borrow" class="flex flex-col items-center justify-center gap-1.5 text-brand transition duration-220 btn-active group">
         <i data-lucide="radio" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
         <span class="text-[10px] font-medium tracking-wide">ยืมของ</span>
       </button>
-      <button onclick="UI_RENDERER.switchTab('status')" id="nav-status" class="flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-white transition duration-220 btn-active group">
+      <button onclick="UI_RENDERER.switchTab('status')" id="nav-status" class="flex flex-col items-center justify-center gap-1.5 text-gray-500 hover:text-gray-900 transition duration-220 btn-active group">
         <i data-lucide="clipboard-list" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
         <span class="text-[10px] font-medium tracking-wide">สถานะของฉัน</span>
       </button>
-      <button onclick="UI_RENDERER.switchTab('admin')" id="nav-admin" class="flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-white transition duration-220 btn-active group">
+      <button onclick="UI_RENDERER.switchTab('admin')" id="nav-admin" class="flex flex-col items-center justify-center gap-1.5 text-gray-500 hover:text-gray-900 transition duration-220 btn-active group">
         <i data-lucide="settings" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
         <span class="text-[10px] font-medium tracking-wide">แอดมิน</span>
       </button>
@@ -762,7 +762,7 @@
         <div class="flex-1" style="background:#F4F5F8;"></div>
         <div class="flex-1" style="background:#A51931;"></div>
       </div>
-      <span class="text-[11px] font-bold tracking-tight text-gray-300">Supasit<span class="font-mono font-medium text-violet-400">@1981th</span></span>
+      <span class="text-[11px] font-bold tracking-tight text-gray-600">Supasit<span class="font-mono font-medium text-violet-600">@1981th</span></span>
       <div class="relative w-[18px] h-[15px] flex-shrink-0 ml-0.5">
         <div class="absolute left-0 top-[3.5px] w-[9px] h-[9px]" style="transform:rotate(-18deg);">
           <div class="absolute left-[2px] top-[4px] w-[6px] h-[4.5px] rounded-full bg-orange-500"></div>
@@ -1298,12 +1298,12 @@
 
           const iconMap  = { success: 'check-circle', error: 'alert-triangle' };
           const colorMap = {
-            success: 'border-green-500/30 text-green-400 bg-green-950/25',
-            error:   'border-red-500/30 text-red-400 bg-red-950/25'
+            success: 'border-green-500/30 text-green-700 bg-green-500/10',
+            error:   'border-red-500/30 text-red-700 bg-red-500/10'
           };
 
           const icon  = iconMap[type]  || 'info';
-          const color = colorMap[type] || 'border-brand-light/30 text-white bg-surface-card/90';
+          const color = colorMap[type] || 'border-brand-light/30 text-gray-900 bg-surface-card/90';
 
           container.insertAdjacentHTML('beforeend', `
             <div id="${id}" class="glass ${color} border px-4 py-3 rounded-xl flex items-center gap-2.5 shadow-lg transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-auto mb-2">
@@ -1353,7 +1353,7 @@
             const active = t === tabName;
             document.getElementById(`nav-${t}`).className =
               `flex flex-col items-center justify-center gap-1.5 transition duration-220 btn-active group ${
-                active ? 'text-brand' : 'text-gray-400 hover:text-white'
+                active ? 'text-brand' : 'text-gray-500 hover:text-gray-900'
               }`;
             document.getElementById(`tab-${t}-content`).classList.toggle('hidden', !active);
           });
@@ -1548,29 +1548,29 @@
               list.innerHTML = filtered.map(item => {
                 let badge = '', actionBtn = '';
                 if (item.status === 'available') {
-                  badge = `<span class="text-[10px] bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">🟢 ว่าง</span>`;
+                  badge = `<span class="text-[10px] bg-green-500/10 border border-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">🟢 ว่าง</span>`;
                   actionBtn = `
                     <button onclick="APP_CORE.handleBorrowRequest('${_esc(item.id)}')"
                       class="w-full mt-3 bg-brand hover:bg-brand-dark text-white font-medium text-xs py-2 rounded-lg transition btn-active flex items-center justify-center gap-1">
                       <i data-lucide="hand-helping" class="w-3.5 h-3.5"></i> ลงทะเบียนขอยืม
                     </button>`;
                 } else if (item.status === 'pending_return') {
-                  badge = `<span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-medium">🟡 รอ Admin ตรวจรับคืน</span>`;
+                  badge = `<span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full font-medium">🟡 รอ Admin ตรวจรับคืน</span>`;
                   actionBtn = `<button disabled class="w-full mt-3 bg-surface-raised text-gray-500 text-xs py-2 rounded-lg cursor-not-allowed">อยู่ระหว่างส่งคืนให้ผู้ดูแล</button>`;
                 } else {
                   const bName = _esc(item.currentBorrower?.name ?? 'ไม่ทราบชื่อ');
-                  badge = `<span class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-medium">🔴 ถูกยืมโดย ${bName}</span>`;
+                  badge = `<span class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-600 px-2 py-0.5 rounded-full font-medium">🔴 ถูกยืมโดย ${bName}</span>`;
                   actionBtn = `<button disabled class="w-full mt-3 bg-surface-raised text-gray-600 text-xs py-2 rounded-lg cursor-not-allowed">ไม่สามารถยืมได้ในขณะนี้</button>`;
                 }
                 return `
-                  <div class="bg-surface-card border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all duration-220">
+                  <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 hover:border-slate-900/10 transition-all duration-220">
                     <div class="flex items-start justify-between">
                       <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-surface-raised flex items-center justify-center border border-white/5">
+                        <div class="w-10 h-10 rounded-lg bg-surface-raised flex items-center justify-center border border-slate-900/5">
                           <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
                         </div>
                         <div>
-                          <h4 class="text-sm font-semibold text-white">${_esc(item.name)}</h4>
+                          <h4 class="text-sm font-semibold text-gray-900">${_esc(item.name)}</h4>
                           <p class="text-[10px] text-gray-500">S/N: ${_esc(item.serial)}</p>
                         </div>
                       </div>
@@ -1610,7 +1610,7 @@
                           <i data-lucide="radio" class="w-5 h-5 text-brand-light"></i>
                         </div>
                         <div>
-                          <h4 class="text-sm font-semibold text-white">${_esc(item.name)}</h4>
+                          <h4 class="text-sm font-semibold text-gray-900">${_esc(item.name)}</h4>
                           <span class="text-[10px] text-gray-500">ยืมเมื่อ: ${_thaiDate(item.currentBorrower?.borrowedAt)}</span>
                         </div>
                       </div>
@@ -1626,18 +1626,18 @@
             pendingList.innerHTML = myPending.length === 0
               ? `<div class="text-center py-4 text-xs text-gray-600">ไม่มีรายการรอส่งคืนค่ะ</div>`
               : myPending.map(item => `
-                  <div class="bg-surface-card border border-white/5 rounded-xl p-4 opacity-75">
+                  <div class="bg-surface-card border border-slate-900/5 rounded-xl p-4 opacity-75">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-surface-raised flex items-center justify-center">
-                          <i data-lucide="radio" class="w-5 h-5 text-amber-400"></i>
+                          <i data-lucide="radio" class="w-5 h-5 text-amber-600"></i>
                         </div>
                         <div>
-                          <h4 class="text-sm font-semibold text-white">${_esc(item.name)}</h4>
+                          <h4 class="text-sm font-semibold text-gray-900">${_esc(item.name)}</h4>
                           <span class="text-[10px] text-gray-500">รอตรวจของและยืนยัน</span>
                         </div>
                       </div>
-                      <span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-medium">🟡 กำลังส่งคืน</span>
+                      <span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full font-medium">🟡 กำลังส่งคืน</span>
                     </div>
                   </div>`).join('');
           }
@@ -1678,24 +1678,24 @@
               const pending = equipment.filter(e => e.status === 'pending_return');
               approvalContainer.innerHTML = pending.length === 0
                 ? `<div class="text-center py-8 text-xs text-gray-500 glass space-y-1">
-                     <i data-lucide="check-circle" class="w-6 h-6 text-green-400 mx-auto"></i>
-                     <p class="font-medium text-white">ตรวจสอบคืนวิทยุเรียบร้อยหมดแล้วค่ะ</p>
+                     <i data-lucide="check-circle" class="w-6 h-6 text-green-600 mx-auto"></i>
+                     <p class="font-medium text-gray-900">ตรวจสอบคืนวิทยุเรียบร้อยหมดแล้วค่ะ</p>
                    </div>`
                 : pending.map(item => `
                     <div class="bg-surface-card border border-amber-500/20 rounded-xl p-4 space-y-3">
                       <div class="flex items-start justify-between">
                         <div class="flex items-center gap-2.5">
                           <div class="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                            <i data-lucide="radio" class="w-4 h-4 text-amber-400"></i>
+                            <i data-lucide="radio" class="w-4 h-4 text-amber-600"></i>
                           </div>
                           <div>
-                            <h4 class="text-sm font-semibold text-white">${_esc(item.name)}</h4>
-                            <p class="text-[10px] text-gray-400">
+                            <h4 class="text-sm font-semibold text-gray-900">${_esc(item.name)}</h4>
+                            <p class="text-[10px] text-gray-500">
                               ผู้ส่งคืน: รหัส ${_esc(item.currentBorrower?.empId ?? '-')} — ${_esc(item.currentBorrower?.name ?? 'ไม่ทราบ')}
                             </p>
                           </div>
                         </div>
-                        <span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">รอเซ็นรับ</span>
+                        <span class="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full">รอเซ็นรับ</span>
                       </div>
                       <button onclick="APP_CORE.approveReturn('${_esc(item.id)}')"
                         class="w-full bg-green-600 hover:bg-green-700 text-white font-medium text-xs py-2 rounded-lg transition btn-active flex items-center justify-center gap-1">
@@ -1714,22 +1714,22 @@
               });
               invContainer.innerHTML = invSorted.map(item => {
                 const badge =
-                  item.status === 'available'      ? `<span class="text-[9px] bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded">ว่าง</span>`     :
-                  item.status === 'pending_return' ? `<span class="text-[9px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded">รอคืน</span>`    :
-                                                     `<span class="text-[9px] bg-red-500/10   text-red-400   px-1.5 py-0.5 rounded">ยืมอยู่</span>`;
+                  item.status === 'available'      ? `<span class="text-[9px] bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded">ว่าง</span>`     :
+                  item.status === 'pending_return' ? `<span class="text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded">รอคืน</span>`    :
+                                                     `<span class="text-[9px] bg-red-500/10   text-red-600   px-1.5 py-0.5 rounded">ยืมอยู่</span>`;
                 const borrowedAt = item.currentBorrower?.borrowedAt;
                 const isOut      = item.status === 'borrowed' || item.status === 'pending_return';
                 const overdue    = isOut && _isOverdue(borrowedAt);
                 const durLine    = isOut && borrowedAt
-                  ? `<span class="text-[9px] ${overdue ? 'text-red-400 font-semibold' : 'text-gray-500'}">${overdue ? '⚠️ ' : '🕒 '}ยืมมา ${_durationText(borrowedAt)}</span>`
+                  ? `<span class="text-[9px] ${overdue ? 'text-red-600 font-semibold' : 'text-gray-500'}">${overdue ? '⚠️ ' : '🕒 '}ยืมมา ${_durationText(borrowedAt)}</span>`
                   : '';
                 return `
-                  <div class="bg-surface-raised border ${overdue ? 'border-red-500/40' : 'border-white/5'} rounded-lg px-3 py-2 flex items-center justify-between">
+                  <div class="bg-surface-raised border ${overdue ? 'border-red-500/40' : 'border-slate-900/5'} rounded-lg px-3 py-2 flex items-center justify-between">
                     <div class="flex items-center gap-2.5 min-w-0">
-                      <i data-lucide="radio" class="w-4 h-4 text-gray-400 shrink-0"></i>
+                      <i data-lucide="radio" class="w-4 h-4 text-gray-500 shrink-0"></i>
                       <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                          <span class="text-xs font-semibold text-white truncate">${_esc(item.name)}</span>
+                          <span class="text-xs font-semibold text-gray-900 truncate">${_esc(item.name)}</span>
                           <span class="text-[9px] text-gray-500 shrink-0">(${_esc(item.serial)})</span>
                         </div>
                         ${durLine}
@@ -1739,20 +1739,20 @@
                       ${badge}
                       ${(item.status === 'borrowed' || item.status === 'pending_return') ? `
                       <button onclick="APP_CORE.openForceRecall('${_esc(item.id)}')"
-                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-orange-400 rounded transition btn-active" title="เรียกคืนทันที">
+                        class="p-1 hover:bg-slate-900/5 text-gray-500 hover:text-orange-600 rounded transition btn-active" title="เรียกคืนทันที">
                         <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                       </button>` : ''}
                       ${item.status === 'borrowed' ? `
                       <button onclick="APP_CORE.openReassign('${_esc(item.id)}')"
-                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-blue-400 rounded transition btn-active" title="โอนให้คนอื่น">
+                        class="p-1 hover:bg-slate-900/5 text-gray-500 hover:text-blue-600 rounded transition btn-active" title="โอนให้คนอื่น">
                         <i data-lucide="user-cog" class="w-3.5 h-3.5"></i>
                       </button>` : ''}
                       <button onclick="APP_CORE.openEquipmentEdit('${_esc(item.id)}')"
-                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-amber-400 rounded transition btn-active" title="แก้ไข">
+                        class="p-1 hover:bg-slate-900/5 text-gray-500 hover:text-amber-600 rounded transition btn-active" title="แก้ไข">
                         <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                       </button>
                       <button onclick="APP_CORE.deleteEquipmentFromAdmin('${_esc(item.id)}')"
-                        class="p-1 hover:bg-white/5 text-gray-500 hover:text-red-400 rounded transition btn-active" title="ลบ">
+                        class="p-1 hover:bg-slate-900/5 text-gray-500 hover:text-red-600 rounded transition btn-active" title="ลบ">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                       </button>
                     </div>
@@ -2116,7 +2116,7 @@
             const active = f.key === _historyFilter;
             return `<button onclick="APP_CORE.setHistoryFilter('${f.key}')"
               class="text-[10px] px-2.5 py-1 rounded-full border transition btn-active ${
-                active ? 'bg-brand/20 border-brand/40 text-brand-light' : 'bg-surface-raised border-white/10 text-gray-400 hover:text-white'
+                active ? 'bg-brand/20 border-brand/40 text-brand-light' : 'bg-surface-raised border-slate-900/10 text-gray-500 hover:text-gray-900'
               }">${f.label}</button>`;
           }).join('');
           if (window.lucide) lucide.createIcons();
@@ -2151,19 +2151,19 @@
           list.innerHTML = rows.map(l => {
             const a = l.action || '';
             const color =
-              a.includes('ยืมอุปกรณ์')                       ? 'text-red-400 bg-red-500/10' :
-              a.includes('ตรวจรับคืน') || a.includes('ส่งคืน') ? 'text-green-400 bg-green-500/10' :
-              a.includes('เรียกคืน')                          ? 'text-orange-400 bg-orange-500/10' :
-              a.includes('โอนเครื่อง')                         ? 'text-blue-400 bg-blue-500/10' :
-                                                              'text-gray-400 bg-white/5';
+              a.includes('ยืมอุปกรณ์')                       ? 'text-red-600 bg-red-500/10' :
+              a.includes('ตรวจรับคืน') || a.includes('ส่งคืน') ? 'text-green-600 bg-green-500/10' :
+              a.includes('เรียกคืน')                          ? 'text-orange-600 bg-orange-500/10' :
+              a.includes('โอนเครื่อง')                         ? 'text-blue-600 bg-blue-500/10' :
+                                                              'text-gray-600 bg-slate-900/5';
             return `
-              <div class="bg-surface-raised border border-white/5 rounded-lg px-3 py-2.5 space-y-1">
+              <div class="bg-surface-raised border border-slate-900/5 rounded-lg px-3 py-2.5 space-y-1">
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${color}">${UI_RENDERER.esc(a)}</span>
                   <span class="text-[9px] text-gray-500 shrink-0">${_thaiDate(l.timestamp)}</span>
                 </div>
-                <p class="text-xs text-white font-medium">${UI_RENDERER.esc(l.equipName || '-')}</p>
-                <p class="text-[10px] text-gray-400">รหัส ${UI_RENDERER.esc(l.empId || '-')} — ${UI_RENDERER.esc(l.empName || '-')}</p>
+                <p class="text-xs text-gray-900 font-medium">${UI_RENDERER.esc(l.equipName || '-')}</p>
+                <p class="text-[10px] text-gray-500">รหัส ${UI_RENDERER.esc(l.empId || '-')} — ${UI_RENDERER.esc(l.empName || '-')}</p>
                 ${l.comment && l.comment !== '-' ? `<p class="text-[10px] text-gray-500 italic">${UI_RENDERER.esc(l.comment)}</p>` : ''}
               </div>`;
           }).join('');
