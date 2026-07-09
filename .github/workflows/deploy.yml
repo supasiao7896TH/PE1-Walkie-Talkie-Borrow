@@ -1,4 +1,4 @@
-name: Deploy RadioSync
+name: Deploy PE1 Walkie Talkie Borrow
 
 on:
   push:
