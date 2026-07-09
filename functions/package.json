@@ -1,5 +1,5 @@
 {
-  "name": "radiosync-functions",
+  "name": "pe1-walkie-talkie-borrow-functions",
   "description": "Cloud Functions for PE1 Walkie Talkie Borrow PWA — push notifications",
   "engines": { "node": "20" },
   "main": "index.js",
