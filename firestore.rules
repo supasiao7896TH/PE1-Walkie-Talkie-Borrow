@@ -3,7 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // RadioSync app data — path: artifacts/{appId}/public/data/{collection}/{doc}
+    // PE1 Walkie Talkie Borrow app data — path: artifacts/{appId}/public/data/{collection}/{doc}
     match /artifacts/{appId}/public/data/{collection}/{docId} {
 
       function isAdmin() {
