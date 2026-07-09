@@ -88,7 +88,7 @@ adminSecrets/{docId}       ← top-level collection (ไม่อยู่ใต
 
 ### 1. Service Worker Cache — ต้อง bump version ทุกครั้งที่แก้ `index.html` หรือ `sw.js`
 
-ไฟล์: `sw.js` บรรทัด `const CACHE_NAME = 'radiosync-vX'`
+ไฟล์: `sw.js` บรรทัด `const CACHE_NAME = 'pe1wt-vX'`
 
 - เปลี่ยน `vX` → `v(X+1)` ทุกครั้งที่มี PR ใหม่
 - ถ้าไม่ bump → มือถือที่ cache ไว้จะยังเห็นเวอร์ชันเก่า
