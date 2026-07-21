@@ -552,9 +552,14 @@
             <p class="text-[10px] text-brand-light font-semibold uppercase">Activity History</p>
           </div>
         </div>
-        <button onclick="UI_RENDERER.closeHistory()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
-          <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-        </button>
+        <div class="flex items-center gap-1">
+          <button onclick="APP_CORE.clearAllHistory()" class="p-1.5 hover:bg-red-500/10 rounded-full transition btn-active" title="ลบประวัติถาวร">
+            <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+          </button>
+          <button onclick="UI_RENDERER.closeHistory()" class="p-1.5 hover:bg-slate-900/5 rounded-full transition btn-active">
+            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+          </button>
+        </div>
       </div>
       <div class="pt-4 space-y-3 shrink-0">
         <div class="relative">
@@ -2440,6 +2445,41 @@
             async () => {
               await STORAGE_ENGINE.clearStore('logs');
               UI_RENDERER.showToast('ล้างประวัติเสร็จสิ้น', 'success');
+            },
+            'alert-triangle'
+          );
+        },
+
+        // Admin: permanently delete ALL history logs from the cloud (irreversible)
+        clearAllHistory() {
+          UI_RENDERER.showCustomConfirm(
+            'ยืนยันลบประวัติถาวร?',
+            'การลบนี้จะลบประวัติการยืม-คืน-เรียกคืน-โอนเครื่องทั้งหมดออกจากระบบถาวร กู้คืนไม่ได้ แนะนำให้ดาวน์โหลดรายงาน Excel เก็บไว้ก่อนลบ',
+            'ลบถาวร',
+            async () => {
+              if (!CLOUD_SYNC_MANAGER.active) {
+                UI_RENDERER.showToast('ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อลบประวัติถาวรค่ะ', 'error');
+                return;
+              }
+              try {
+                const { httpsCallable } = window.FirebaseLib;
+                const fn  = httpsCallable(CLOUD_SYNC_MANAGER.functions, 'clearAllHistory');
+                const res = await fn();
+                if (res.data.success) {
+                  await STORAGE_ENGINE.clearStore('logs');
+                  _historyCache = [];
+                  this.applyHistoryFilter();
+                  UI_RENDERER.showToast(`ลบประวัติถาวรสำเร็จ (${res.data.deleted} รายการ)`, 'success');
+                } else {
+                  UI_RENDERER.showToast('เกิดข้อผิดพลาด กรุณาลองใหม่ค่ะ', 'error');
+                }
+              } catch (e) {
+                console.error('clearAllHistory failed', e);
+                const msg = e.code === 'permission-denied'
+                  ? 'ต้องเป็นแอดมินก่อนถึงจะลบประวัติได้ค่ะ'
+                  : 'ลบประวัติล้มเหลว กรุณาลองใหม่ค่ะ';
+                UI_RENDERER.showToast(msg, 'error');
+              }
             },
             'alert-triangle'
           );

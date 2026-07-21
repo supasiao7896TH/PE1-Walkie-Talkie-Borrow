@@ -17,6 +17,7 @@ const PIN_SALT      = 'radiosync-server-pin-salt-v2'; // server-only, never ship
 const DEFAULT_PIN   = '1234';
 const MAX_ATTEMPTS   = 5;
 const LOCKOUT_MS     = 5 * 60 * 1000;
+const APP_ID         = 'a-class-radiosync'; // matches client's default _appId (index.html) — __app_id is never injected in this static deployment
 
 function hashPin(pin) {
   return crypto.createHash('sha256').update(pin + PIN_SALT).digest('hex');
@@ -84,6 +85,30 @@ exports.changeAdminPin = onCall(async (request) => {
 
   await configRef.set({ pinHash: hashPin(newPin), updatedAt: Date.now() });
   return { success: true };
+});
+
+// Permanently deletes all history logs. Admin-only; Firestore rules block
+// client-side delete on 'logs' entirely (create-only audit trail) — this
+// bypasses that via the Admin SDK, same mechanism as changeAdminPin above.
+exports.clearAllHistory = onCall(async (request) => {
+  if (!request.auth || request.auth.token.admin !== true) {
+    throw new HttpsError('permission-denied', 'ต้องเป็นแอดมินก่อน');
+  }
+
+  const db      = getFirestore();
+  const logsRef = db.collection(`artifacts/${APP_ID}/public/data/logs`);
+  const snap    = await logsRef.get();
+  const docs    = snap.docs;
+
+  const CHUNK_SIZE = 450; // stay under Firestore's 500-writes-per-batch limit
+  for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
+    const batch = db.batch();
+    docs.slice(i, i + CHUNK_SIZE).forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  }
+
+  console.log(`clearAllHistory: admin ${request.auth.uid} deleted ${docs.length} log(s)`);
+  return { success: true, deleted: docs.length };
 });
 
 exports.notifyAdminOnEquipmentChange = onDocumentUpdated(
