@@ -1290,6 +1290,7 @@
 
       return {
         esc: _esc,
+        thaiDate: _thaiDate,
 
         showToast(message, type = 'success') {
           const container = document.getElementById('toast-container');
@@ -2159,7 +2160,7 @@
               <div class="bg-surface-raised border border-slate-900/5 rounded-lg px-3 py-2.5 space-y-1">
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${color}">${UI_RENDERER.esc(a)}</span>
-                  <span class="text-[9px] text-gray-500 shrink-0">${_thaiDate(l.timestamp)}</span>
+                  <span class="text-[9px] text-gray-500 shrink-0">${UI_RENDERER.thaiDate(l.timestamp)}</span>
                 </div>
                 <p class="text-xs text-gray-900 font-medium">${UI_RENDERER.esc(l.equipName || '-')}</p>
                 <p class="text-[10px] text-gray-500">รหัส ${UI_RENDERER.esc(l.empId || '-')} — ${UI_RENDERER.esc(l.empName || '-')}</p>
