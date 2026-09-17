@@ -11,6 +11,10 @@
 - ภาษาของ UI: **ภาษาไทย**
 - รูปแบบ: Single-page app — โค้ดทั้งหมดอยู่ใน `index.html` ไฟล์เดียว
 
+ไฟล์เอกสารอื่นในรูทที่เนื้อหาซ้อนกับไฟล์นี้: `AGENTS.md` (คู่มือเดียวกัน เขียนไว้ให้ agent ตัวอื่นที่ไม่ใช่ Claude Code)
+และ `context.md` (สรุปภาพรวมสั้นๆ เชิงธุรกิจ ไม่มีกฎเชิงลึก) — แก้กฎ/โครงสร้างใน `CLAUDE.md` แล้วควรอัปเดต
+`AGENTS.md` ให้ตรงกันด้วย
+
 ---
 
 ## Tech Stack
@@ -81,6 +85,42 @@ adminSecrets/{docId}       ← top-level collection (ไม่อยู่ใต
 **⚠️ `adminSecrets` เข้าถึงได้เฉพาะ Cloud Functions (Admin SDK bypass rules) เท่านั้น — firestore.rules บล็อก client ทุกทาง (`allow read, write: if false`) ห้ามให้ client อ่าน/เขียนตรงเด็ดขาด**
 
 **สถานะอุปกรณ์ที่ถูกต้อง:** `'available' | 'borrowed' | 'pending_return'`
+
+---
+
+## Architecture — โครงสร้างภายใน `index.html`
+
+ไฟล์เดียว 141KB แบ่งเป็น IIFE module เรียงตามลำดับ dependency (แต่ละตัวมี comment header คั่นในไฟล์
+พร้อมเลขกำกับ ①②④⑤⑥⑦⑧⑨ — เลข ③ ถูกข้ามไว้ตั้งแต่ refactor ก่อนหน้า ไม่ใช่ไฟล์ขาดหาย):
+
+| Module | หน้าที่ |
+|--------|---------|
+| `APP_CONFIG` | ค่าคงที่ (ชื่อ IndexedDB, session timeout, seed data 3 เครื่องเริ่มต้น) |
+| `PIN_GUARD` | เรียก Cloud Functions `verifyAdminPin`/`changeAdminPin` ผ่าน `httpsCallable` — ไม่ทำ PIN check ฝั่ง client เลย |
+| `STATE_STORE` | Reactive state แบบ pub/sub (`_publish` แจ้ง subscriber เมื่อ state เปลี่ยน) |
+| `STORAGE_ENGINE` | wrapper รอบ IndexedDB (Promise-based) สำหรับ cache ข้อมูลไว้ใช้ offline |
+| `CLOUD_SYNC_MANAGER` | init Firebase, real-time listener กับ Firestore, ทำ borrow/return เป็น transaction |
+| `SESSION_MANAGER` | auto-logout แอดมินหลัง idle 15 นาที (`sessionTimeoutMs` ใน `APP_CONFIG`) |
+| `UI_RENDERER` | render DOM, toast, modal, สลับแท็บ — ไม่มี framework, DOM API ตรงๆ |
+| `APP_CORE` | business logic หลัก (borrow/return/approve/force-recall/reassign), init ตอนโหลดหน้า, export CSV |
+
+**Data flow หลัก:** ผู้ใช้กดปุ่มใน UI → `APP_CORE` เรียก `CLOUD_SYNC_MANAGER` เขียนลง Firestore →
+listener ของ Firestore ยิงกลับมาอัปเดต `STATE_STORE` → `UI_RENDERER` subscribe แล้ว re-render อัตโนมัติ
+(ไม่มีการ set state ตรงๆ จาก UI event — ต้องผ่าน sync manager เสมอเพื่อให้ offline cache ใน
+`STORAGE_ENGINE` sync กลับตรงกับ Firestore)
+
+### Cloud Functions (`functions/index.js`)
+
+| Function | Trigger | หน้าที่ |
+|----------|---------|---------|
+| `verifyAdminPin` | `onCall` | ตรวจ PIN hash (SHA-256 + salt), lockout 5 ครั้ง/5 นาที, ตั้ง custom claim `admin: true` เมื่อถูก |
+| `changeAdminPin` | `onCall` | ต้องมี claim `admin: true` มาก่อน — ตรวจ PIN เดิมแล้วเปลี่ยนเป็น PIN ใหม่ |
+| `clearAllHistory` | `onCall` | admin-only, ลบ log ทั้งหมดถาวรผ่าน Admin SDK (bypass กฎ create-only ปกติของ `logs`) |
+| `notifyAdminOnEquipmentChange` | `onDocumentUpdated` (equipment) | ส่ง FCM push หา token ใน `adminTokens` เมื่อ status เปลี่ยนเป็น `borrowed`/`pending_return` |
+
+**⚠️ ค่าคงที่ `APP_ID = 'a-class-radiosync'` ใน `functions/index.js` hardcode ไว้ต้องตรงกับ `_appId`
+ฝั่ง client ใน `index.html` เสมอ (ไม่มีการ inject `__app_id` ใน static deployment นี้) — ถ้าแก้ค่าใดค่าหนึ่งแล้ว
+ไม่แก้อีกฝั่ง `clearAllHistory`/`notifyAdminOnEquipmentChange` จะชี้ผิด path และหาเอกสารไม่เจอ**
 
 ---
 
@@ -173,6 +213,7 @@ equipment write ที่เป็น admin-only (approve return, force recall, 
 | In-app History | drawer แสดง log ทั้งหมด + ค้นหา + กรองประเภท |
 | Push Notification | admin รับ notification เมื่ออุปกรณ์เปลี่ยนสถานะ |
 | Export CSV | export log ทั้งหมดเป็น CSV |
+| Clear All History | admin ลบ log ทั้งหมดถาวรผ่าน Cloud Function `clearAllHistory` (bypass create-only rule) |
 | Admin PIN | ยืนยันฝั่ง server ผ่าน Cloud Function (SHA-256 hash + lockout 5 ครั้ง/5 นาที) + ตั้ง custom claim `admin: true` |
 | LINE Banner | แจ้งเตือน iOS ให้เปิดใน Safari, Android ให้เปิดใน Chrome |
 
