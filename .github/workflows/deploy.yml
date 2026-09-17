@@ -77,19 +77,22 @@ jobs:
           cp index.html sw.js manifest.json icon-192.png icon-512.png tailwind.css dist/
 
       # wrangler pages deploy does NOT create the project on its own — it 404s
-      # ("Project not found") the first time. This is a no-op once the project
-      # exists (fails harmlessly on later runs, hence continue-on-error).
-      - name: Create Cloudflare Pages project (first run only)
-        uses: cloudflare/wrangler-action@v3
-        continue-on-error: true
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: e87e6b4e7ec59834a35db192e7e37eb8
-          command: pages project create pe1-walkie-talkie-borrow --production-branch=main
+      # ("Project not found") the first time. Check first so a real token/API
+      # error on create doesn't get silently swallowed on later runs.
+      - name: Ensure Cloudflare Pages project exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: e87e6b4e7ec59834a35db192e7e37eb8
+        run: |
+          if npx wrangler pages project list | grep -q "pe1-walkie-talkie-borrow"; then
+            echo "Project already exists — skipping create."
+          else
+            npx wrangler pages project create pe1-walkie-talkie-borrow --production-branch=main
+          fi
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: e87e6b4e7ec59834a35db192e7e37eb8
-          command: pages deploy dist --project-name=pe1-walkie-talkie-borrow --branch=main --commit-dirty=true
+          command: pages deploy dist --project-name=pe1-walkie-talkie-borrow --branch=main
