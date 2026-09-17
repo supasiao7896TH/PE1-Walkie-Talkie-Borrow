@@ -101,14 +101,25 @@ exports.clearAllHistory = onCall(async (request) => {
   const docs    = snap.docs;
 
   const CHUNK_SIZE = 450; // stay under Firestore's 500-writes-per-batch limit
-  for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
-    const batch = db.batch();
-    docs.slice(i, i + CHUNK_SIZE).forEach(d => batch.delete(d.ref));
-    await batch.commit();
+  let deleted = 0;
+  try {
+    for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
+      const chunk = docs.slice(i, i + CHUNK_SIZE);
+      const batch = db.batch();
+      chunk.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      deleted += chunk.length;
+    }
+  } catch (e) {
+    // Earlier chunks already committed and can't be rolled back — surface
+    // exactly how many succeeded so the client doesn't report "failed" over
+    // a delete that partly went through.
+    console.error(`clearAllHistory: admin ${request.auth.uid} failed after deleting ${deleted}/${docs.length} log(s)`, e);
+    throw new HttpsError('internal', 'ลบประวัติไม่สำเร็จทั้งหมด', { deleted, total: docs.length });
   }
 
-  console.log(`clearAllHistory: admin ${request.auth.uid} deleted ${docs.length} log(s)`);
-  return { success: true, deleted: docs.length };
+  console.log(`clearAllHistory: admin ${request.auth.uid} deleted ${deleted} log(s)`);
+  return { success: true, deleted };
 });
 
 exports.notifyAdminOnEquipmentChange = onDocumentUpdated(

@@ -2475,10 +2475,23 @@
                 }
               } catch (e) {
                 console.error('clearAllHistory failed', e);
-                const msg = e.code === 'permission-denied'
-                  ? 'ต้องเป็นแอดมินก่อนถึงจะลบประวัติได้ค่ะ'
-                  : 'ลบประวัติล้มเหลว กรุณาลองใหม่ค่ะ';
-                UI_RENDERER.showToast(msg, 'error');
+                if (e.code === 'permission-denied') {
+                  UI_RENDERER.showToast('ต้องเป็นแอดมินก่อนถึงจะลบประวัติได้ค่ะ', 'error');
+                } else if (e.details?.deleted > 0) {
+                  // Some batches already committed server-side before the failure —
+                  // refetch from Firestore instead of assuming nothing changed.
+                  const logs = await CLOUD_SYNC_MANAGER.fetchAll('logs').catch(() => null);
+                  if (logs) {
+                    _historyCache = logs.sort((a, b) => b.timestamp - a.timestamp);
+                    this.applyHistoryFilter();
+                  }
+                  UI_RENDERER.showToast(
+                    `ลบสำเร็จบางส่วน (${e.details.deleted}/${e.details.total} รายการ) แล้วเกิดข้อผิดพลาด กรุณาตรวจสอบแล้วลองใหม่ค่ะ`,
+                    'error'
+                  );
+                } else {
+                  UI_RENDERER.showToast('ลบประวัติล้มเหลว กรุณาลองใหม่ค่ะ', 'error');
+                }
               }
             },
             'alert-triangle'
