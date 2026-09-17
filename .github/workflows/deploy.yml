@@ -60,3 +60,25 @@ jobs:
         working-directory: functions
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+  # ── Deploy static app to Cloudflare Pages (alternate URL for distribution) ──
+  deploy-cloudflare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Only the files sw.js actually caches (STATIC_ASSETS) — the "functions/"
+      # dir must NOT be included here, or Cloudflare Pages will try to parse
+      # its Firebase Cloud Functions source as its own Pages Functions.
+      - name: Assemble static site
+        run: |
+          mkdir -p dist
+          cp index.html sw.js manifest.json icon-192.png icon-512.png tailwind.css dist/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: e87e6b4e7ec59834a35db192e7e37eb8
+          command: pages deploy dist --project-name=pe1-walkie-talkie-borrow --branch=main

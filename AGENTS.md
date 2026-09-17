@@ -27,7 +27,7 @@ agent โดยเฉพาะ (เนื้อหาเดียวกันก
 | Auth | Firebase Anonymous Auth + `inMemoryPersistence` |
 | Push Notification | Firebase Cloud Messaging (FCM) |
 | Background Logic | Firebase Cloud Functions v2 (Node 20) |
-| Hosting | GitHub Pages (static files) |
+| Hosting | GitHub Pages (static files) + Cloudflare Pages (mirror สำหรับแจกจ่าย URL ให้ทีม) |
 | CI/CD | GitHub Actions |
 | PWA Cache | Service Worker (`sw.js`) |
 
@@ -107,6 +107,7 @@ adminSecrets/{docId}       ← top-level collection (ไม่อยู่ใต
 `deploy.yml` deploy เฉพาะ:
 - GitHub Pages (job: `deploy-pages`) ✅
 - Cloud Functions (job: `deploy-functions`) ✅
+- Cloudflare Pages (job: `deploy-cloudflare`) ✅
 
 `firestore.rules` **ไม่ได้ deploy อัตโนมัติ** — ถ้าแก้ rules ต้อง deploy manual ผ่าน Firebase Console หรือ CLI:
 ```bash
@@ -123,6 +124,21 @@ npx firebase-tools deploy --only firestore:rules
 ### 4. Cloud Functions Token — `deploy-functions` อาจ fail
 
 `FIREBASE_TOKEN` secret ใน GitHub อาจหมดอายุ → job `deploy-functions` จะ fail แต่ **ไม่กระทบ `deploy-pages`** ทั้งสอง job รันแยกกัน แก้โดย regenerate token แล้วอัพเดต GitHub Secret
+
+### 4b. Cloudflare Pages — mirror URL สำหรับแจกจ่ายให้ทีม
+
+job `deploy-cloudflare` copy เฉพาะไฟล์ที่ `sw.js` cache จริง (`index.html`, `sw.js`, `manifest.json`,
+`icon-192.png`, `icon-512.png`, `tailwind.css`) ไปไว้ใน `dist/` แล้ว deploy ด้วย
+`cloudflare/wrangler-action@v3` (`wrangler pages deploy`)
+
+**⚠️ ห้าม deploy ทั้ง repo root ไป Cloudflare Pages ตรงๆ** เพราะ Cloudflare Pages มองว่าโฟลเดอร์ `functions/`
+ในรูทคือ *Pages Functions* ของตัวเอง แล้วจะพยายาม parse `functions/index.js` (Firebase Cloud Functions
+export syntax คนละแบบ) เป็น route handler ของตัวเอง — ทำให้ deploy fail หรือพฤติกรรมเพี้ยน
+
+- Secret ที่ต้องมีใน GitHub repo secrets: `CLOUDFLARE_API_TOKEN`
+- Account ID (`e87e6b4e7ec59834a35db192e7e37eb8`) hardcode ในไฟล์ workflow ได้ ไม่ใช่ข้อมูลลับ
+- URL ที่ได้: `https://pe1-walkie-talkie-borrow.pages.dev`
+- เพิ่ม static asset ใหม่ใน `sw.js` (`STATIC_ASSETS`) ต้องเพิ่มใน `cp` ของ step "Assemble static site" ด้วย
 
 ### 5. Tailwind CSS — precompiled, ต้อง rebuild ทุกครั้งที่แก้/เพิ่ม class ใน `index.html`
 
