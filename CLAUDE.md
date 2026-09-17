@@ -172,7 +172,8 @@ job `deploy-cloudflare` copy เฉพาะไฟล์ที่ `sw.js` cache 
 - Secret ที่ต้องมีใน GitHub repo secrets: `CLOUDFLARE_API_TOKEN` (permission: Account → Cloudflare Pages → Edit)
 - Account ID (`e87e6b4e7ec59834a35db192e7e37eb8`) hardcode ไว้ใน workflow ตรงๆ ได้ ไม่ใช่ข้อมูลลับ
 - Project name: `pe1-walkie-talkie-borrow` → URL ที่ได้: `https://pe1-walkie-talkie-borrow.pages.dev`
-  (project ถูกสร้างอัตโนมัติจาก `wrangler pages deploy` ตอน deploy ครั้งแรก ไม่ต้องสร้างเองผ่าน dashboard ก่อน)
+  (`wrangler pages deploy` เองไม่สร้าง project ให้ — workflow มี step "Create Cloudflare Pages project"
+  รันก่อน deploy เสมอ เป็น no-op ถ้า project มีอยู่แล้ว [`continue-on-error: true`] ไม่ต้องสร้างเองผ่าน dashboard)
 - ถ้าเพิ่ม static asset ใหม่ที่ต้อง cache ใน `sw.js` (`STATIC_ASSETS`) ต้องเพิ่มใน `cp` ของ step
   "Assemble static site" ในนี้ด้วย ไม่งั้นไฟล์นั้นจะไม่ถูก deploy ไป Cloudflare (แต่ยังอยู่บน GitHub Pages ปกติ)
 
