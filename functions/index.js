@@ -64,10 +64,14 @@ exports.verifyAdminPin = onCall(async (request) => {
   });
 });
 
-exports.changeAdminPin = onCall(async (request) => {
+function requireAdmin(request) {
   if (!request.auth || request.auth.token.admin !== true) {
     throw new HttpsError('permission-denied', 'ต้องเป็นแอดมินก่อน');
   }
+}
+
+exports.changeAdminPin = onCall(async (request) => {
+  requireAdmin(request);
   const currentPin = String(request.data?.currentPin || '');
   const newPin     = String(request.data?.newPin || '');
   if (!/^\d{4}$/.test(newPin)) {
@@ -91,30 +95,42 @@ exports.changeAdminPin = onCall(async (request) => {
 // client-side delete on 'logs' entirely (create-only audit trail) — this
 // bypasses that via the Admin SDK, same mechanism as changeAdminPin above.
 exports.clearAllHistory = onCall(async (request) => {
-  if (!request.auth || request.auth.token.admin !== true) {
-    throw new HttpsError('permission-denied', 'ต้องเป็นแอดมินก่อน');
-  }
+  requireAdmin(request);
+
+  // Trust the client's own _appId instead of keeping a second hardcoded copy
+  // that can silently drift from index.html's default — fall back to APP_ID
+  // only if the client didn't send one. Validated so it can't smuggle path
+  // traversal into the Firestore collection path.
+  const appId = /^[A-Za-z0-9_-]+$/.test(request.data?.appId || '') ? request.data.appId : APP_ID;
 
   const db      = getFirestore();
-  const logsRef = db.collection(`artifacts/${APP_ID}/public/data/logs`);
+  const logsRef = db.collection(`artifacts/${appId}/public/data/logs`);
   const snap    = await logsRef.get();
   const docs    = snap.docs;
 
   const CHUNK_SIZE = 450; // stay under Firestore's 500-writes-per-batch limit
+  const chunks = [];
+  for (let i = 0; i < docs.length; i += CHUNK_SIZE) chunks.push(docs.slice(i, i + CHUNK_SIZE));
+
+  // Batches touch disjoint documents, so commit them in parallel instead of
+  // sequentially — keeps a large logs collection well under onCall's 60s
+  // timeout. allSettled (not all) so a mid-flight failure still lets us
+  // report exactly how many logs were actually deleted.
+  const results = await Promise.allSettled(chunks.map(chunk => {
+    const batch = db.batch();
+    chunk.forEach(d => batch.delete(d.ref));
+    return batch.commit().then(() => chunk.length);
+  }));
+
   let deleted = 0;
-  try {
-    for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
-      const chunk = docs.slice(i, i + CHUNK_SIZE);
-      const batch = db.batch();
-      chunk.forEach(d => batch.delete(d.ref));
-      await batch.commit();
-      deleted += chunk.length;
-    }
-  } catch (e) {
-    // Earlier chunks already committed and can't be rolled back — surface
-    // exactly how many succeeded so the client doesn't report "failed" over
-    // a delete that partly went through.
-    console.error(`clearAllHistory: admin ${request.auth.uid} failed after deleting ${deleted}/${docs.length} log(s)`, e);
+  let failed  = false;
+  for (const r of results) {
+    if (r.status === 'fulfilled') deleted += r.value;
+    else failed = true;
+  }
+
+  if (failed) {
+    console.error(`clearAllHistory: admin ${request.auth.uid} failed after deleting ${deleted}/${docs.length} log(s)`);
     throw new HttpsError('internal', 'ลบประวัติไม่สำเร็จทั้งหมด', { deleted, total: docs.length });
   }
 

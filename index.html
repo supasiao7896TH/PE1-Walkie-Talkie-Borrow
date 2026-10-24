@@ -1174,7 +1174,8 @@
         },
 
         get active() { return _active; },
-        get functions() { return _functions; }
+        get functions() { return _functions; },
+        get appId() { return _appId; }
       };
     })();
 
@@ -2464,7 +2465,7 @@
               try {
                 const { httpsCallable } = window.FirebaseLib;
                 const fn  = httpsCallable(CLOUD_SYNC_MANAGER.functions, 'clearAllHistory');
-                const res = await fn();
+                const res = await fn({ appId: CLOUD_SYNC_MANAGER.appId });
                 if (res.data.success) {
                   await STORAGE_ENGINE.clearStore('logs');
                   _historyCache = [];
